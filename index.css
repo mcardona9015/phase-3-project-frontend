@@ -7,12 +7,17 @@
     display: grid;
     grid-template-rows: repeat(var(--grid-rows), 48px);
     grid-template-columns: repeat(var(--grid-cols), 48px);
-    background-image: url('/test-maze.png');
+    /* background-image: url('https://www.theedkins.co.uk/jo/maze/design/drmaze3.gif'); */
+    /* background-image: url('test-maze.png'); */
     background-repeat: no-repeat;
     /* justify-items: center;
     align-items: center; */
     /* margin-top: 1rem; */
     
+  }
+
+  .maze-image {
+    position: absolute;
   }
   
   .grid-item {

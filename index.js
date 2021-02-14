@@ -1,84 +1,128 @@
+const map = document.querySelector(".map")
 const container = document.querySelector(".grid");
 const gridNodes = document.querySelectorAll(".grid-item");
 const gridArray = Array.from(gridNodes);
-
-let character = document.querySelector(".Character");
-let position = {x: 1, y: 2};
-let gridSize = {x: 32, y: 32}
-
-
-function makeGrid(cols, rows) {
-  container.style.setProperty("--grid-rows", rows);
-  container.style.setProperty("--grid-cols", cols);
-  
-  let x = 0;
-  let y = 0;
-  for (let c = 0; c < rows * cols; c++) {
-    let cell = document.createElement("div");
-    
-    y = c%cols + 1;
-    
-    if (c%cols == 0) {
-    	x++;
-    }    
-        
-    container.appendChild(cell).className = "grid-item grid-item-" + x + '-' + y;
-  }
-}
 const keys = {
   left: 37,
   up: 38,
   right: 39,
   down: 40
 };
+let position;
+let grid;
 
-makeGrid(gridSize.x, gridSize.y);
-// character.style.width = "20px";
-// character.style.height = "20px";
-// character.style.backgroundColor = "#000";
-let startingGridItem = document.querySelector(".grid-item-1-2");
-startingGridItem.appendChild(character);
+
+window.addEventListener("keydown", handleKey);
+document.addEventListener('keydown', changeCharacterDirection)
+
+fetchPlayer().then(getGrid).then(makeGrid)
+fetchPlayer().then(createCharacter)
+
+
+function fetchPlayer(){
+  return fetch('http://localhost:3000/players/1')
+  .then(response => response.json())
+}
+
+
+function createCharacter(playerData){
+  let characterObj = playerData.games[0].characters[0]
+  let characterPosition = playerData.games[0].board.start_coordinates
+  position = {x: characterPosition[0], y: characterPosition[1]}
+  
+  let characterDiv = document.createElement('div')
+  characterDiv.classList = "Character"
+  
+  let characterImg = document.createElement('img')
+  characterImg.classList = "Character_spritesheet pixelart face-down"
+  characterImg.src = characterObj.pixel_art
+  
+  let startingGridItem = document.querySelector(`.grid-item-${characterPosition[0]}-${characterPosition[1]}`);
+  characterDiv.append(characterImg)
+  startingGridItem.append(characterDiv);
+}
+
+
+function getGrid(playerData){
+  const board = playerData.games[0].board
+  const notAllowed = board.not_allowed
+  let x = board.grid_size[0]
+  let y = board.grid_size[1]
+
+  // container.style.backgroundImage = 'url("test-maze.png")'
+  grid = {x, y, notAllowed}
+  return grid
+}
+
+
+function makeGrid(grid) {
+  container.style.setProperty("--grid-rows", grid.y);
+  container.style.setProperty("--grid-cols", grid.x);
+  console.log(grid.notAllowed)
+  let x = 0;
+  let y = 0;
+  for (let c = 0; c < grid.y * grid.x; c++) {
+    let cell = document.createElement("div");
+    
+    y = c%grid.x + 1;
+    
+    if (c%grid.x == 0) {
+      x++;
+    }    
+    
+    container.appendChild(cell).className = "grid-item grid-item-" + x + '-' + y;
+    
+    if (grid.notAllowed.includes(`${x}-${y}`)){
+      cell.classList = "grid-item not-allowed grid-item-" + x + '-' + y
+    }
+  }
+
+}
+
+
 
 function handleKey(e) {
   switch (e.keyCode) {
     case keys.left:
-      if (position.y > 2) {position.y--} ;
+      if (position.y > 2 && !document.querySelector(`.grid-item-${position.x}-${position.y -1}`).classList.contains("not-allowed")) 
+      {position.y--} ;
+      
       break;
     case keys.up:
-      if (position.x > 1) {position.x--};
+      if (position.x > 1  && !document.querySelector(`.grid-item-${position.x-1}-${position.y}`).classList.contains("not-allowed")) 
+      {position.x--};
       break;
 
     case keys.right:
-      if (position.y < gridSize.y - 1) {position.y++};
-      // console.log('gridSize.y: ', gridSize.y);
-      console.log('position.y: ', position.y);
-      console.log('position.x: ', position.x);
+      if (position.y < grid.y - 1 && !document.querySelector(`.grid-item-${position.x}-${position.y+1}`).classList.contains("not-allowed")) 
+      {position.y++};
       break;
 
     case keys.down:
-      if (position.x < gridSize.x) {position.x++};
+      if (position.x < grid.x && !document.querySelector(`.grid-item-${position.x+1}-${position.y}`).classList.contains("not-allowed")) 
+      {position.x++};
       break;
   }
-  
+  const character = document.querySelector(".Character")
   let gridItem = document.querySelector(".grid-item-" + position.x + '-' + position.y);
-  gridItem.appendChild(character);
+  if (!gridItem.classList.contains('not-allowed'))
+  {gridItem.appendChild(character)}
 }
-window.addEventListener("keydown", handleKey);
 
+
+function changeCharacterDirection(e){
 const characterSprite = document.querySelector('.Character_spritesheet')
 const characterDiv = document.querySelector('.Character')
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowUp') {
-        characterSprite.classList = 'Character_spritesheet pixelart face-up'
-    }
-    if (e.key === 'ArrowDown') {
-        characterSprite.classList = 'Character_spritesheet pixelart face-down'
-    }
-    if (e.key === 'ArrowLeft') {
-        characterSprite.classList = 'Character_spritesheet pixelart face-left'
-    }
-    if (e.key === 'ArrowRight') {
-        characterSprite.classList = 'Character_spritesheet pixelart face-right '
-    }
-})
+  if (e.key === 'ArrowUp') {
+      characterSprite.classList = 'Character_spritesheet pixelart face-up'
+  }
+  if (e.key === 'ArrowDown') {
+      characterSprite.classList = 'Character_spritesheet pixelart face-down'
+  }
+  if (e.key === 'ArrowLeft') {
+      characterSprite.classList = 'Character_spritesheet pixelart face-left'
+  }
+  if (e.key === 'ArrowRight') {
+      characterSprite.classList = 'Character_spritesheet pixelart face-right '
+  }}
