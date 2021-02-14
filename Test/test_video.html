@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Phaser Test</title>
+    <style>*{margin:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.js"></script>
+    <!-- <script src="game.js"></script> -->
+    <script defer src="index.js"></script>
+  </head>
+  <body>
+    <iframe class='video' width="500" height="300"
+      src="https://www.youtube.com/embed/ekI7vjkFrGA" allowfullscreen>
+    </iframe>
+    <div class="Character">
+   
+      <img class="Character_shadow pixelart" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/21542/DemoRpgCharacterShadow.png" alt="Shadow" />
+      
+      <img class="Character_spritesheet pixelart face-down" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/21542/DemoRpgCharacter.png" alt="Character" />
+      
+      
+   </div>
+    <style>
+      body {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        justify-items: center;
+
+      }
+      .video {
+        grid-column: 2;
+        grid-row: 2;
+        display: hidden;
+      }
+
+      :root {
+      --pixel-size: 6;
+      }
+
+      body {
+        background: #96ffc1;
+      }
+
+      .Character {
+        grid-row: 1;
+        grid-column: 1;
+        width: calc(32px * var(--pixel-size));
+        height: calc(32px * var(--pixel-size));
+        overflow: hidden;
+        position: relative;
+        margin: 4em auto;
+      }
+
+      .Character_spritesheet {
+        animation: moveSpritesheet 1s steps(4) infinite;
+        width: calc(128px * var(--pixel-size));
+        position: absolute;
+        
+      }
+      .Character_shadow {
+        position: absolute;
+        width: calc(32px * var(--pixel-size));
+        height: calc(32px * var(--pixel-size));
+      }
+
+      .pixelart {
+        image-rendering: pixelated;
+      }
+
+      .face-right {
+        top: calc(-32px * var(--pixel-size));
+      }
+      .face-up {
+        top: calc(-64px * var(--pixel-size));
+      }
+      .face-left {
+        top: calc(-96px * var(--pixel-size));
+      }
+
+
+      @keyframes moveSpritesheet {
+        from {
+            transform: translate3d(0px,0,0)
+        }
+        to {
+            transform: translate3d(-100%,0,0)
+        }
+      }
+      @keyframes moveCharacter {
+        from {
+            transform: translate3d(0px,0,0)
+        }
+        to {
+            transform: translate3d(100%,0,0)
+        }
+      }
+
+      .move-character {
+        animation: moveCharacter 1.5s
+      }
+
+
+    </style>
+  </body>
+</html>
