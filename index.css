@@ -18,6 +18,7 @@
 
   .maze-image {
     position: absolute;
+    opacity: 0.5;
   }
   
   .grid-item {
@@ -25,6 +26,7 @@
     place-content: center;
     padding: 1em;
     border: 1px solid rgb(105, 0, 0);
+    color: pink
     /* text-align: center; */
   }
 
