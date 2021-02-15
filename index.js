@@ -3,17 +3,25 @@ const container = document.querySelector(".grid");
 const gridNodes = document.querySelectorAll(".grid-item");
 const gridArray = Array.from(gridNodes);
 const mazeImage = document.querySelector('.maze-image')
+const timerDiv = document.querySelector('.timer')
+const startButton = document.querySelector('.start-timer')
+const timerP = timerDiv.querySelector('p')
+
 const keys = {
   left: 37,
   up: 38,
   right: 39,
   down: 40
 };
-let position, grid, startingGridItem, startingPosition, score
+let position, grid, startingGridItem, startingPosition, gameOver, timer
+let time = 0.0, score = 100
 
 
 window.addEventListener("keydown", handleKey);
 document.addEventListener('keydown', changeCharacterDirection)
+startButton.addEventListener('click',() => {
+  timer = setInterval(startTimer, 100)
+})
 
 
 fetchPlayer().then(getGrid).then(makeGrid)
@@ -51,7 +59,7 @@ function getGrid(playerData){
   let y = board.grid_size[1]
   const goalCoord = board.goal_coordinates
 
-  mazeImage.src = board.background
+  mazeImage.src = 'new.png'
   grid = {x, y, notAllowed, goalCoord}
   return grid
 }
@@ -89,7 +97,6 @@ function makeGrid(grid) {
   }
 
 }
-
 
 
 function handleKey(e) {
@@ -142,22 +149,34 @@ const characterDiv = document.querySelector('.Character')
       characterSprite.classList = 'Character_spritesheet pixelart face-right '
   }}
 
+  function startTimer(){
+    time += 0.1
+    timerP.innerText = time.toFixed(1)
+  }
+
+  function endTimer(){
+    clearInterval(timer)
+    time = 0.0
+    timerP.innerText = time
+  }
+
 
   function winGame(character){
     startingGridItem.append(character)
     position = {x: startingPosition[0], y: startingPosition[1]}
     console.log("You win!")
-    let finalScore = 100
-    updateGame(finalScore)
+    results = {score, time}
+    updateGame(results)
+    endTimer()
   }
 
-  function updateGame(score){
+  function updateGame(results){
     fetch('http://localhost:3000/games/1', {
       method: "PATCH",
       headers: {
         "Content-Type" : 'application/json'
       },
-      body: JSON.stringify({score})
+      body: JSON.stringify(results)
     })
     // .then(response => response.json())
     // .then(console.log)
