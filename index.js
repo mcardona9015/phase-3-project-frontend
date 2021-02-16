@@ -19,6 +19,7 @@ let position, grid, startingGridItem, startingPosition, gameOver, timer
 let time = 0.0, score = parseInt(scoreP.innerText)
 console.log('score: ', score);
 
+window.addEventListener('load', )
 
 window.addEventListener("keydown", handleKey);
 document.addEventListener('keydown', changeCharacterDirection)
@@ -178,7 +179,7 @@ function handleKey(e) {
   }
   if (gridItem.classList.contains('trophy')){
     score += 100
-    scoreP.innerText = `Score: ${score}`
+    scoreP.innerText = score
     gridItem.classList = 'grid-item'
     gridItem.querySelector('.trophy-image').remove()
 
@@ -216,7 +217,7 @@ const characterDiv = document.querySelector('.Character')
 
   function clearScore(){
     score = 0
-    scoreP.innerText = `Score: ${score}`
+    scoreP.innerText = score
   }
 
 
