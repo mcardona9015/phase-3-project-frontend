@@ -20,6 +20,11 @@
     position: absolute;
     opacity: 0.5;
   }
+
+  .trophy-image {
+    position: absolute;
+    opacity: 0.5;
+  }
   
   .grid-item {
     display: grid;

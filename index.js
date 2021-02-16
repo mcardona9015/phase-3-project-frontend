@@ -27,12 +27,24 @@ startButton.addEventListener('click',() => {
 
 fetchPlayer().then(getGrid).then(makeGrid)
 fetchPlayer().then(createCharacter)
+fetchPlayer().then(createObstacle)
 
 
 function fetchPlayer(){
   return fetch('http://localhost:3000/players/1')
   .then(response => response.json())
 }
+
+function createObstacle(playerData){
+  let boardObstacleObj = playerData.games[0].board.board_obstacles[0]
+  console.log(boardObstacleObj)
+  let obstacleObj = playerData.games[0].board.obstacles.find(obstacle => obstacle.id === boardObstacleObj.obstacle_id)
+  console.log(obstacleObj)
+
+  let obstaclePosition = boardObstacleObj.
+}
+
+
 
 
 function createCharacter(playerData){
@@ -54,6 +66,7 @@ function createCharacter(playerData){
 
 
 function getGrid(playerData){
+
   const board = playerData.games[0].board
   const notAllowed = board.not_allowed
   const trophies = board.trophies
