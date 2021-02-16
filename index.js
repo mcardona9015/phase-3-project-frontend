@@ -4,7 +4,8 @@ const gridNodes = document.querySelectorAll(".grid-item");
 const gridArray = Array.from(gridNodes);
 // const mazeImage = document.querySelector('.maze-image')
 const gameInfo = document.querySelector('.game-info')
-const startButton = document.querySelector('.start-timer')
+const startStopButton = document.querySelector('#start-stop')
+
 const timerP = gameInfo.querySelector('.timer')
 const scoreP = gameInfo.querySelector('.score')
 
@@ -20,14 +21,24 @@ let time = 0.0, score = parseInt(scoreP.innerText)
 
 window.addEventListener("keydown", handleKey);
 document.addEventListener('keydown', changeCharacterDirection)
-startButton.addEventListener('click',() => {
-  timer = setInterval(startTimer, 100)
+startStopButton.addEventListener('click',(e) => {
+  if (e.target.className === "start-game") {
+    e.target.innerText = 'Stop Game'
+    timer = setInterval(startTimer, 100)
+    fetchPlayer().then(getGrid).then(makeGrid)
+    fetchPlayer().then(createCharacter)
+    fetchPlayer().then(createObstacle)
+    console.log(e.target)
+  }
+  if (e.target.className === "stop-game") {
+    e.target.innerText = 'Start Game'
+    quitGame()
+  }
+  e.target.classList.toggle("stop-game")
+  e.target.classList.toggle("start-game")
 })
 
 
-fetchPlayer().then(getGrid).then(makeGrid)
-fetchPlayer().then(createCharacter)
-fetchPlayer().then(createObstacle)
 
 
 function fetchPlayer(){
@@ -37,11 +48,16 @@ function fetchPlayer(){
 
 function createObstacle(playerData){
   let boardObstacleObj = playerData.games[0].board.board_obstacles[0]
-  console.log(boardObstacleObj)
   let obstacleObj = playerData.games[0].board.obstacles.find(obstacle => obstacle.id === boardObstacleObj.obstacle_id)
-  console.log(obstacleObj)
-
-  let obstaclePosition = boardObstacleObj.
+  let obstacleCoordinates = boardObstacleObj.coordinates
+  obstacleCoordinates.forEach(coordinate => {
+    let cell = document.querySelector(`#grid-item-${coordinate}`)
+    let image = document.createElement('img')
+    image.src = obstacleObj.pixel_art
+    cell.append(image)
+    // cell.style.backgroundImage = `url(${obstacleObj.pixel_art})`
+    cell.classList = 'grid-item obstacle'
+  })
 }
 
 
@@ -98,7 +114,7 @@ function makeGrid(grid) {
     if (c%grid.x == 0) {
       x++;
     }    
-    cell.innerText = `${x}-${y}`
+    // cell.innerText = `${x}-${y}`
     cell.id = `grid-item-${x}-${y}`
 
     
@@ -113,6 +129,10 @@ function makeGrid(grid) {
     }
     if (grid.trophies.includes(`${x}-${y}`)){
       cell.classList = "grid-item trophy"
+      let trophyImage = document.createElement('img')
+      trophyImage.className = 'trophy-image'
+      trophyImage.src = 'coin.png'
+      cell.append(trophyImage)
     }
 
   }
@@ -150,12 +170,17 @@ function handleKey(e) {
   {gridItem.appendChild(character)}
 
   if (gridItem.classList.contains('goal')){
-    winGame(character)
+    winGame()
+  }
+  if (gridItem.classList.contains('obstacle')){
+    loseGame()
   }
   if (gridItem.classList.contains('trophy')){
     score += 100
     scoreP.innerText = score
     gridItem.classList = 'grid-item'
+    gridItem.querySelector('.trophy-image').remove()
+
   }
 }
 
@@ -188,23 +213,59 @@ const characterDiv = document.querySelector('.Character')
     timerP.innerText = time
   }
 
-  function updateScore(){
+  function clearScore(){
     score = 0
     scoreP.innerText = score
   }
 
 
-  function winGame(character){
+  function winGame(){
+    // startingGridItem.append(character)
+    // position = {x: startingPosition[0], y: startingPosition[1]}
+    resetBoard()
+    // fetchPlayer().then(getGrid).then(makeGrid)
+    // fetchPlayer().then(createCharacter)
+    // fetchPlayer().then(createObstacle)
+    console.log("You win!")
+    results = {score, time}
+    updateGame(results)
+    resetButton()
+   
+    
+  }
+  function loseGame(){
     // startingGridItem.append(character)
     // position = {x: startingPosition[0], y: startingPosition[1]}
     Array.from(container.children).forEach(child => child.remove())
     fetchPlayer().then(getGrid).then(makeGrid)
     fetchPlayer().then(createCharacter)
-    console.log("You win!")
-    results = {score, time}
-    updateGame(results)
+    fetchPlayer().then(createObstacle)
+    console.log("You Lose! Try again!")
+    // results = {score, time}
+    // updateGame(results)
+    // endTimer()
+    clearScore()
+  }
+
+
+  function quitGame(){
+    resetBoard()
+  }
+
+  function resetButton(){
+    startStopButton.classList = "start-game"
+    startStopButton.innerText = "Start Game"
+  }
+  
+  function resetBoard(){
+    Array.from(container.children).forEach(child => child.remove())
     endTimer()
-    updateScore()
+    clearScore()
+    container.style.setProperty("--grid-rows", 0);
+    container.style.setProperty("--grid-cols", 0);
+    // debugger
+    // startStopButton.classList = "start-game"
+    // startStopButton.innerText = "Start Game"
   }
 
   function updateGame(results){
