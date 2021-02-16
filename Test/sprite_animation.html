@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprite Animation</title>
+</head>
+<body>
+    <div class="character"> 
+        <img class="character-spritesheet" src="sample_sprite_sheet_large.png" alt="Character" />       
+     </div>
+     <style>
+         .character {
+        width: 320px;
+        height: 320px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .character-spritesheet {
+        animation: moveSpritesheet 1s steps(4) infinite;
+      }
+
+      @keyframes moveSpritesheet {
+        from {
+            transform: translate(0px,0)
+        }
+        to {
+            transform: translate(-100%,0)
+        }
+      }
+     </style>
+</body>
+</html>

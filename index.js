@@ -2,10 +2,11 @@ const map = document.querySelector(".map")
 const container = document.querySelector(".grid");
 const gridNodes = document.querySelectorAll(".grid-item");
 const gridArray = Array.from(gridNodes);
-const mazeImage = document.querySelector('.maze-image')
-const timerDiv = document.querySelector('.timer')
+// const mazeImage = document.querySelector('.maze-image')
+const gameInfo = document.querySelector('.game-info')
 const startButton = document.querySelector('.start-timer')
-const timerP = timerDiv.querySelector('p')
+const timerP = gameInfo.querySelector('.timer')
+const scoreP = gameInfo.querySelector('.score')
 
 const keys = {
   left: 37,
@@ -14,7 +15,7 @@ const keys = {
   down: 40
 };
 let position, grid, startingGridItem, startingPosition, gameOver, timer
-let time = 0.0, score = 100
+let time = 0.0, score = parseInt(scoreP.innerText)
 
 
 window.addEventListener("keydown", handleKey);
@@ -55,12 +56,16 @@ function createCharacter(playerData){
 function getGrid(playerData){
   const board = playerData.games[0].board
   const notAllowed = board.not_allowed
+  const trophies = board.trophies
   let x = board.grid_size[0]
   let y = board.grid_size[1]
   const goalCoord = board.goal_coordinates
 
+  mazeImage = document.createElement('img')
+  mazeImage.classList = "maze-image"
   mazeImage.src = 'new.png'
-  grid = {x, y, notAllowed, goalCoord}
+  container.prepend(mazeImage)
+  grid = {x, y, notAllowed, goalCoord, trophies}
   return grid
 }
 
@@ -93,6 +98,9 @@ function makeGrid(grid) {
     if (grid.notAllowed.includes(`${x}-${y}`)){
       cell.classList = "grid-item not-allowed"
     }
+    if (grid.trophies.includes(`${x}-${y}`)){
+      cell.classList = "grid-item trophy"
+    }
 
   }
 
@@ -124,10 +132,17 @@ function handleKey(e) {
   }
   const character = document.querySelector(".Character")
   let gridItem = document.querySelector("#grid-item-" + position.x + '-' + position.y);
+
   if (!gridItem.classList.contains('not-allowed'))
   {gridItem.appendChild(character)}
+
   if (gridItem.classList.contains('goal')){
     winGame(character)
+  }
+  if (gridItem.classList.contains('trophy')){
+    score += 100
+    scoreP.innerText = score
+    gridItem.classList = 'grid-item'
   }
 }
 
@@ -160,14 +175,23 @@ const characterDiv = document.querySelector('.Character')
     timerP.innerText = time
   }
 
+  function updateScore(){
+    score = 0
+    scoreP.innerText = score
+  }
+
 
   function winGame(character){
-    startingGridItem.append(character)
-    position = {x: startingPosition[0], y: startingPosition[1]}
+    // startingGridItem.append(character)
+    // position = {x: startingPosition[0], y: startingPosition[1]}
+    Array.from(container.children).forEach(child => child.remove())
+    fetchPlayer().then(getGrid).then(makeGrid)
+    fetchPlayer().then(createCharacter)
     console.log("You win!")
     results = {score, time}
     updateGame(results)
     endTimer()
+    updateScore()
   }
 
   function updateGame(results){
