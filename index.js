@@ -2,7 +2,7 @@
 
 const body = document.querySelector('body')
 const content = body.querySelector('.content')
-const container = document.querySelector(".grid");
+// const container = document.querySelector(".grid");
 const gridNodes = document.querySelectorAll(".grid-item");
 const gridArray = Array.from(gridNodes);
 const gameInfo = document.querySelector('.game-info')
@@ -16,7 +16,7 @@ const keys = {
   right: 39,
   down: 40
 }
-let position, grid, startingGridItem, startingPosition, gameOver, timer, player
+let position, grid, startingGridItem, startingPosition, gameOver, timer, player, container, currentGame, character
 let time = 0.0, score = parseInt(scoreP.innerText)
 // console.log('score: ', score);
 
@@ -25,9 +25,20 @@ function fetchAllPlayers() {
   .then(response => response.json())
 }
 
-function fetchPlayer(){
-  return fetch('http://localhost:3000/players/2')
+function fetchPlayer(id){
+  return fetch(`http://localhost:3000/players/${id}`)
   .then(response => response.json())
+}
+
+function fetchBoard(id){
+  return fetch(`http://localhost:3000/boards/${id}`)
+  .then(response => response.json())
+}
+
+function fetchCharacter() {
+  fetch('http://localhost:3000/characters/1')
+  .then(response => response.json())
+  .then(data => character = data)
 }
 
 function addPlayerToDatabase(username){
@@ -46,22 +57,22 @@ playerNameForm.addEventListener('submit', (e) => {
   e.preventDefault();
   let username = e.target.username.value.toLowerCase();
   fetchAllPlayers().then(data => findPlayer(data, username))
-  playerNameForm.remove()
+  clearContent()
   renderStartMenu()
 })
 
-startStopButton.addEventListener('click',(e) => {
-  if (e.target.className === "start-game") {
-    e.target.innerText = "Stop Game"
-    startGame()
-  }
-  if (e.target.className === "stop-game") {
-    e.target.innerText = "Start Game"
-    quitGame()
-  }
-  e.target.classList.toggle("stop-game")
-  e.target.classList.toggle("start-game")
-})
+// startStopButton.addEventListener('click',(e) => {
+//   if (e.target.className === "start-game") {
+//     e.target.innerText = "Stop Game"
+//     startGame()
+//   }
+//   if (e.target.className === "stop-game") {
+//     e.target.innerText = "Start Game"
+//     quitGame()
+//   }
+//   e.target.classList.toggle("stop-game")
+//   e.target.classList.toggle("start-game")
+// })
 
 function findPlayer(playerArray, username) {
   player = playerArray.find(player => player.username === username)
@@ -75,22 +86,39 @@ function findPlayer(playerArray, username) {
 function renderStartMenu() {
   renderBoardSelections()
   const gameBoardsContainer = document.querySelector('.game-boards-container')
-  gameBoardsContainer.addEventListener('click', () => {
-    createNewGame()
-    renderGameBoard()
+  gameBoardsContainer.addEventListener('click', (e) => {
+    const boardId = e.target.dataset.id
+    let newGame = {player_id: player.id, board_id: boardId}
+    clearContent()
+    createNewGame(newGame)
+    renderGameBoard(boardId)
     startGame()
   }) 
 
+}
+
+function createNewGame(game) {
+  fetch('http://localhost:3000/games', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(game)
+  })
+  .then(response => response.json())
+  .then(data => currentGame = data)
 }
 
 function renderBoardSelections() {
   const gameBoards = document.createElement("div")
   gameBoards.className = 'game-boards-container'
   const boardOneImage = document.createElement("img")
+  boardOneImage.dataset.id = 1
   boardOneImage.src = 'background.png'
   boardOneImage.alt = 'board one'
   boardOneImage.classList = 'board-image board-one'
   const boardTwoImage = document.createElement("img")
+  boardTwoImage.dataset.id = 2
   boardTwoImage.src = 'test-2.png'
   boardTwoImage.alt = 'board two'
   boardTwoImage.classList = 'board-image board-two'
@@ -101,20 +129,28 @@ function renderBoardSelections() {
 
 function startGame(){
   startTimer()
-  renderGameBoard()
+  // renderGameBoard()
   document.addEventListener("keydown", handleKey);
   document.addEventListener('keydown', changeCharacterDirection)
 }
 
-function renderGameBoard(){
-  fetchPlayer().then(getGrid).then(makeGrid)
-  fetchPlayer().then(createCharacter)
-  fetchPlayer().then(createObstacle)
+function renderGameBoard(id){
+  container = document.createElement('div')
+  container.classList = 'container grid'
+  content.append(container)
+  fetchBoard(id).then(getGrid).then(makeGrid)
+  fetchCharacter()
+  fetchBoard(id).then(getStartingPosition).then(createCharacter)
+  fetchBoard(id).then(createObstacle)
 }
 
-function createObstacle(playerData){
-  let boardObstacleObj = playerData.games[0].board.board_obstacles[0]
-  let obstacleObj = playerData.games[0].board.obstacles.find(obstacle => obstacle.id === boardObstacleObj.obstacle_id)
+function getStartingPosition(board) {
+  return board.start_coordinates
+}
+
+function createObstacle(board){
+  let boardObstacleObj = board.board_obstacles[0]
+  let obstacleObj = board.obstacles.find(obstacle => obstacle.id === boardObstacleObj.obstacle_id)
   let obstacleCoordinates = boardObstacleObj.coordinates
   obstacleCoordinates.forEach(coordinate => {
     let cell = document.querySelector(`#grid-item-${coordinate}`)
@@ -126,9 +162,7 @@ function createObstacle(playerData){
   })
 }
 
-function createCharacter(playerData){
-  let characterObj = playerData.games[0].characters[0]
-  startingPosition = playerData.games[0].board.start_coordinates
+function createCharacter(startingPosition){
   position = {x: startingPosition[0], y: startingPosition[1]}
   
   let characterDiv = document.createElement('div')
@@ -136,16 +170,15 @@ function createCharacter(playerData){
   
   let characterImg = document.createElement('img')
   characterImg.classList = "Character_spritesheet pixelart face-down"
-  characterImg.src = characterObj.pixel_art
+  characterImg.src = character.pixel_art
   
   startingGridItem = document.querySelector(`#grid-item-${startingPosition[0]}-${startingPosition[1]}`);
   characterDiv.append(characterImg)
   startingGridItem.append(characterDiv);
 }
 
-function getGrid(playerData){
-
-  const board = playerData.games[0].board
+function getGrid(board){
+  console.log(container)
   const notAllowed = board.not_allowed
   const trophies = board.trophies
   let x = board.grid_size[0]
@@ -156,13 +189,14 @@ function getGrid(playerData){
   // mazeImage.src = 'test-2.png'
   // mazeImage.src = 'new.png'
   // container.prepend(mazeImage)
+  if (board.id == 1){container.style.backgroundImage = 'url("background.png")'}
+  if (board.id == 2){container.style.backgroundImage = 'url("test-2.png")'}
   grid = {x, y, notAllowed, goalCoord, trophies}
   return grid
 }
 
 function makeGrid(grid) {
   // const container = document.createElement('div')
-  container.style.backgroundImage = 'url("test-2.png")'
   container.style.setProperty("--grid-rows", grid.y);
   container.style.setProperty("--grid-cols", grid.x);
 
@@ -325,6 +359,10 @@ function updateGame(results){
     },
     body: JSON.stringify(results)
   })
+}
+
+function clearContent(){
+  Array.from(content.children).forEach(child => child.remove())
 }
 
 
