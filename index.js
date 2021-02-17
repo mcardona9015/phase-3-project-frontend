@@ -56,7 +56,7 @@ playerNameForm.addEventListener('submit', (e) => {
   renderStartMenu()
 })
 
-// startStopButton.addEventListener('click',(e) => {
+// startBtn.addEventListener('click',(e) => {
 //   if (e.target.className === "start-game") {
 //     e.target.innerText = "Stop Game"
 //     startGame()
@@ -230,6 +230,7 @@ function makeGrid(grid) {
     
     if (grid.goalCoord[0] == x && grid.goalCoord[1] == y){
       cell.classList = "grid-item goal"
+      cell.innerText = 'Goal!'
     }
     if (grid.notAllowed.includes(`${x}-${y}`)){
       cell.classList = "grid-item not-allowed"
@@ -241,9 +242,7 @@ function makeGrid(grid) {
       trophyImage.src = 'coin.png'
       cell.append(trophyImage)
     }
-
   }
-
 }
 
 function handleKey(e) {
@@ -354,8 +353,8 @@ function quitGame(){
 }
 
 function resetButton(){
-  startStopButton.classList = "start-game"
-  startStopButton.innerText = "Start Game"
+  startBtn.classList = "start-game"
+  startBtn.innerText = "Start Game"
 }
 
 function resetBoard(){
@@ -367,7 +366,7 @@ function resetBoard(){
 }
 
 function updateGame(results){
-  fetch('http://localhost:3000/games/2', {
+  fetch(`http://localhost:3000/games/${currentGame.id}`, {
     method: "PATCH",
     headers: {
       "Content-Type" : 'application/json'
