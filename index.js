@@ -2,30 +2,32 @@ const map = document.querySelector(".map")
 const container = document.querySelector(".grid");
 const gridNodes = document.querySelectorAll(".grid-item");
 const gridArray = Array.from(gridNodes);
-// const mazeImage = document.querySelector('.maze-image')
 const gameInfo = document.querySelector('.game-info')
 const startStopButton = document.querySelector('#start-stop')
-
 const timerP = gameInfo.querySelector('.timer')
 const scoreP = gameInfo.querySelector('.score')
-
 const keys = {
   left: 37,
   up: 38,
   right: 39,
   down: 40
-};
+}
 let position, grid, startingGridItem, startingPosition, gameOver, timer
 let time = 0.0, score = parseInt(scoreP.innerText)
 console.log('score: ', score);
 
-
+function fetchPlayer(){
+  return fetch('http://localhost:3000/players/2')
+  .then(response => response.json())
+}
 
 window.addEventListener("keydown", handleKey);
+
 document.addEventListener('keydown', changeCharacterDirection)
+
 startStopButton.addEventListener('click',(e) => {
   if (e.target.className === "start-game") {
-    e.target.innerText = 'Stop Game'
+    e.target.innerText = "Stop Game"
     timer = setInterval(startTimer, 100)
     fetchPlayer().then(getGrid).then(makeGrid)
     fetchPlayer().then(createCharacter)
@@ -33,20 +35,12 @@ startStopButton.addEventListener('click',(e) => {
     console.log(e.target)
   }
   if (e.target.className === "stop-game") {
-    e.target.innerText = 'Start Game'
+    e.target.innerText = "Start Game"
     quitGame()
   }
   e.target.classList.toggle("stop-game")
   e.target.classList.toggle("start-game")
 })
-
-
-
-
-function fetchPlayer(){
-  return fetch('http://localhost:3000/players/2')
-  .then(response => response.json())
-}
 
 function createObstacle(playerData){
   let boardObstacleObj = playerData.games[0].board.board_obstacles[0]
@@ -61,9 +55,6 @@ function createObstacle(playerData){
     cell.classList = 'grid-item obstacle'
   })
 }
-
-
-
 
 function createCharacter(playerData){
   let characterObj = playerData.games[0].characters[0]
@@ -82,7 +73,6 @@ function createCharacter(playerData){
   startingGridItem.append(characterDiv);
 }
 
-
 function getGrid(playerData){
 
   const board = playerData.games[0].board
@@ -91,21 +81,19 @@ function getGrid(playerData){
   let x = board.grid_size[0]
   let y = board.grid_size[1]
   const goalCoord = board.goal_coordinates
-
-  mazeImage = document.createElement('img')
-  mazeImage.classList = "maze-image"
-  mazeImage.src = 'test-2.png'
+  // mazeImage = document.createElement('img')
+  // mazeImage.classList = "maze-image"
+  // mazeImage.src = 'test-2.png'
   // mazeImage.src = 'new.png'
-  container.prepend(mazeImage)
+  // container.prepend(mazeImage)
+  container.style.backgroundImage = 'url("test-2.png")'
   grid = {x, y, notAllowed, goalCoord, trophies}
   return grid
 }
 
-
 function makeGrid(grid) {
   container.style.setProperty("--grid-rows", grid.y);
   container.style.setProperty("--grid-cols", grid.x);
-  
 
   let x = 0;
   let y = 0;
@@ -117,15 +105,13 @@ function makeGrid(grid) {
     if (c%grid.x == 0) {
       x++;
     }    
-    // cell.innerText = `${x}-${y}`
+
     cell.id = `grid-item-${x}-${y}`
 
-    
     container.appendChild(cell).className = "grid-item"
     
     if (grid.goalCoord[0] == x && grid.goalCoord[1] == y){
-      cell.classList = "goal grid-item"
-
+      cell.classList = "grid-item goal"
     }
     if (grid.notAllowed.includes(`${x}-${y}`)){
       cell.classList = "grid-item not-allowed"
@@ -141,7 +127,6 @@ function makeGrid(grid) {
   }
 
 }
-
 
 function handleKey(e) {
 
@@ -189,96 +174,80 @@ function handleKey(e) {
 
 
 function changeCharacterDirection(e){
-const characterSprite = document.querySelector('.Character_spritesheet')
-const characterDiv = document.querySelector('.Character')
+  const characterSprite = document.querySelector('.Character_spritesheet')
 
-  if (e.key === 'ArrowUp') {
+  switch (e.keyCode) {
+    case keys.up:
       characterSprite.classList = 'Character_spritesheet pixelart face-up'
-  }
-  if (e.key === 'ArrowDown') {
+      break
+    case keys.down:
       characterSprite.classList = 'Character_spritesheet pixelart face-down'
-  }
-  if (e.key === 'ArrowLeft') {
+      break
+    case keys.left:
       characterSprite.classList = 'Character_spritesheet pixelart face-left'
+      break
+    case keys.right:
+      characterSprite.classList = 'Character_spritesheet pixelart face-right'
   }
-  if (e.key === 'ArrowRight') {
-      characterSprite.classList = 'Character_spritesheet pixelart face-right '
-  }}
+}
 
-  function startTimer(){
-    time += 0.1
-    timerP.innerText = time.toFixed(1)
-  }
+function startTimer(){
+  time += 0.1
+  timerP.innerText = time.toFixed(1)
+}
 
-  function endTimer(){
-    clearInterval(timer)
-    time = 0.0
-    timerP.innerText = time
-  }
+function endTimer(){
+  clearInterval(timer)
+  time = 0.0
+  timerP.innerText = time
+}
 
-  function clearScore(){
-    score = 0
-    scoreP.innerText = score
-  }
+function clearScore(){
+  score = 0
+  scoreP.innerText = score
+}
 
+function winGame(){
+  time = time.toFixed(1)
+  let results = {score, time}
+  updateGame(results)
+  resetBoard()
+  resetButton()
+  console.log("You win!")
+}
 
-  function winGame(){
-    // startingGridItem.append(character)
-    // position = {x: startingPosition[0], y: startingPosition[1]}
-    resetBoard()
-    // fetchPlayer().then(getGrid).then(makeGrid)
-    // fetchPlayer().then(createCharacter)
-    // fetchPlayer().then(createObstacle)
-    console.log("You win!")
-    results = {score, time}
-    updateGame(results)
-    resetButton()
-   
-    
-  }
-  function loseGame(){
-    // startingGridItem.append(character)
-    // position = {x: startingPosition[0], y: startingPosition[1]}
-    Array.from(container.children).forEach(child => child.remove())
-    fetchPlayer().then(getGrid).then(makeGrid)
-    fetchPlayer().then(createCharacter)
-    fetchPlayer().then(createObstacle)
-    console.log("You Lose! Try again!")
-    // results = {score, time}
-    // updateGame(results)
-    // endTimer()
-    clearScore()
-  }
+function loseGame(){
+  Array.from(container.children).forEach(child => child.remove())
+  fetchPlayer().then(getGrid).then(makeGrid)
+  fetchPlayer().then(createCharacter)
+  fetchPlayer().then(createObstacle)
+  clearScore()
+  console.log("You Lose! Try again!")
+}
 
+function quitGame(){
+  resetBoard()
+}
 
-  function quitGame(){
-    resetBoard()
-  }
+function resetButton(){
+  startStopButton.classList = "start-game"
+  startStopButton.innerText = "Start Game"
+}
 
-  function resetButton(){
-    startStopButton.classList = "start-game"
-    startStopButton.innerText = "Start Game"
-  }
-  
-  function resetBoard(){
-    Array.from(container.children).forEach(child => child.remove())
-    endTimer()
-    clearScore()
-    container.style.setProperty("--grid-rows", 0);
-    container.style.setProperty("--grid-cols", 0);
-    // debugger
-    // startStopButton.classList = "start-game"
-    // startStopButton.innerText = "Start Game"
-  }
+function resetBoard(){
+  Array.from(container.children).forEach(child => child.remove())
+  endTimer()
+  clearScore()
+  container.style.setProperty("--grid-rows", 0);
+  container.style.setProperty("--grid-cols", 0);
+}
 
-  function updateGame(results){
-    fetch('http://localhost:3000/games/1', {
-      method: "PATCH",
-      headers: {
-        "Content-Type" : 'application/json'
-      },
-      body: JSON.stringify(results)
-    })
-    // .then(response => response.json())
-    // .then(console.log)
-  }
+function updateGame(results){
+  fetch('http://localhost:3000/games/2', {
+    method: "PATCH",
+    headers: {
+      "Content-Type" : 'application/json'
+    },
+    body: JSON.stringify(results)
+  })
+}
