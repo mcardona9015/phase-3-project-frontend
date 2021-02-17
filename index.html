@@ -9,8 +9,14 @@
     <link rel="stylesheet" href="index.css" />
   </head>
   <body>
-    <h1 class="text-center text-white">Maze</h1>
-    <main class="map">
+    <header>
+      <h1 class="logo">Maze</h1>
+    </header>
+    <main class="content">
+      <form class='name-form'>
+        <input type="text" name="username" placeholder="Username"></input>
+        <input type="submit" value="Go!"></input>
+      </form>
       <div class="container grid">
         <!-- <img class="maze-image"> -->
         <!-- <div class="Character">
@@ -26,6 +32,7 @@
         <p >Score: <span class="score">0</span></p>
       </div>
     </main>
-    <script src="index.js"></script>
+    <script defer src="index.js"></script>
+    <!-- <script defer src="game.js" type="module"></script> -->
   </body>
 </html>

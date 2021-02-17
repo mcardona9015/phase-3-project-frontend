@@ -1,4 +1,7 @@
-const map = document.querySelector(".map")
+// import * as game from './game.js'
+
+const body = document.querySelector('body')
+// const map = document.querySelector(".map")
 const container = document.querySelector(".grid");
 const gridNodes = document.querySelectorAll(".grid-item");
 const gridArray = Array.from(gridNodes);
@@ -14,7 +17,7 @@ const keys = {
 }
 let position, grid, startingGridItem, startingPosition, gameOver, timer
 let time = 0.0, score = parseInt(scoreP.innerText)
-console.log('score: ', score);
+// console.log('score: ', score);
 
 function fetchPlayer(){
   return fetch('http://localhost:3000/players/2')
@@ -28,11 +31,7 @@ document.addEventListener('keydown', changeCharacterDirection)
 startStopButton.addEventListener('click',(e) => {
   if (e.target.className === "start-game") {
     e.target.innerText = "Stop Game"
-    timer = setInterval(startTimer, 100)
-    fetchPlayer().then(getGrid).then(makeGrid)
-    fetchPlayer().then(createCharacter)
-    fetchPlayer().then(createObstacle)
-    console.log(e.target)
+    startGame()
   }
   if (e.target.className === "stop-game") {
     e.target.innerText = "Start Game"
@@ -41,6 +40,17 @@ startStopButton.addEventListener('click',(e) => {
   e.target.classList.toggle("stop-game")
   e.target.classList.toggle("start-game")
 })
+
+function startGame(){
+  startTimer()
+  renderGameBoard()
+}
+
+function renderGameBoard(){
+  fetchPlayer().then(getGrid).then(makeGrid)
+  fetchPlayer().then(createCharacter)
+  fetchPlayer().then(createObstacle)
+}
 
 function createObstacle(playerData){
   let boardObstacleObj = playerData.games[0].board.board_obstacles[0]
@@ -86,12 +96,13 @@ function getGrid(playerData){
   // mazeImage.src = 'test-2.png'
   // mazeImage.src = 'new.png'
   // container.prepend(mazeImage)
-  container.style.backgroundImage = 'url("test-2.png")'
   grid = {x, y, notAllowed, goalCoord, trophies}
   return grid
 }
 
 function makeGrid(grid) {
+  // const container = document.createElement('div')
+  container.style.backgroundImage = 'url("test-2.png")'
   container.style.setProperty("--grid-rows", grid.y);
   container.style.setProperty("--grid-cols", grid.x);
 
@@ -192,6 +203,10 @@ function changeCharacterDirection(e){
 }
 
 function startTimer(){
+  timer = setInterval(incrementTimer, 100)
+}
+
+function incrementTimer(){
   time += 0.1
   timerP.innerText = time.toFixed(1)
 }
@@ -250,4 +265,48 @@ function updateGame(results){
     },
     body: JSON.stringify(results)
   })
+}
+
+
+
+
+
+// createWelcome()
+
+
+// function createWelcome(){
+//   const playerNameForm = document.createElement('form')
+//   playerNameForm.classList = 'name-form'
+
+//   playerNameForm.addEventListener('submit', addPlayerToDatabase)
+
+//   const username = document.createElement('input')
+//   username.setAttribute('type', "text")
+//   username.setAttribute('name', 'username')
+//   username.setAttribute('placeholder', 'Username')
+
+//   const submitBtn = document.createElement('input')
+//   submitBtn.setAttribute('type', 'submit')
+//   submitBtn.setAttribute('value', 'Go!')
+
+
+//   playerNameForm.append(username, submitBtn)
+//   body.append(playerNameForm)
+
+// }
+
+
+function addPlayerToDatabase(e){
+  e.preventDefault()
+  username = e.target.username.value
+
+  fetch('http://localhost:3000/players', {
+    method : "POST",
+    headers: {
+      'Content-Type' : 'application/json'
+    },
+    body: JSON.stringify({username})
+  })
+  .then(response => response.json())
+  .then(console.log)
 }
