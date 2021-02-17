@@ -1,7 +1,7 @@
 // import * as game from './game.js'
 
 const body = document.querySelector('body')
-// const map = document.querySelector(".map")
+const content = body.querySelector('.content')
 const container = document.querySelector(".grid");
 const gridNodes = document.querySelectorAll(".grid-item");
 const gridArray = Array.from(gridNodes);
@@ -9,24 +9,46 @@ const gameInfo = document.querySelector('.game-info')
 const startStopButton = document.querySelector('#start-stop')
 const timerP = gameInfo.querySelector('.timer')
 const scoreP = gameInfo.querySelector('.score')
+const playerNameForm = document.querySelector('.name-form')
 const keys = {
   left: 37,
   up: 38,
   right: 39,
   down: 40
 }
-let position, grid, startingGridItem, startingPosition, gameOver, timer
+let position, grid, startingGridItem, startingPosition, gameOver, timer, player
 let time = 0.0, score = parseInt(scoreP.innerText)
 // console.log('score: ', score);
+
+function fetchAllPlayers() {
+  return fetch('http://localhost:3000/players')
+  .then(response => response.json())
+}
 
 function fetchPlayer(){
   return fetch('http://localhost:3000/players/2')
   .then(response => response.json())
 }
 
-window.addEventListener("keydown", handleKey);
+function addPlayerToDatabase(username){
+  fetch('http://localhost:3000/players', {
+    method : "POST",
+    headers: {
+      'Content-Type' : 'application/json'
+    },
+    body: JSON.stringify({username})
+  })
+  .then(response => response.json())
+  .then(data => player = data)
+}
 
-document.addEventListener('keydown', changeCharacterDirection)
+playerNameForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  let username = e.target.username.value.toLowerCase();
+  fetchAllPlayers().then(data => findPlayer(data, username))
+  playerNameForm.remove()
+  renderStartMenu()
+})
 
 startStopButton.addEventListener('click',(e) => {
   if (e.target.className === "start-game") {
@@ -41,9 +63,47 @@ startStopButton.addEventListener('click',(e) => {
   e.target.classList.toggle("start-game")
 })
 
+function findPlayer(playerArray, username) {
+  player = playerArray.find(player => player.username === username)
+  if (player == undefined) {
+    addPlayerToDatabase(username)
+  }
+}
+
+////////////////////
+
+function renderStartMenu() {
+  renderBoardSelections()
+  const gameBoardsContainer = document.querySelector('.game-boards-container')
+  gameBoardsContainer.addEventListener('click', () => {
+    createNewGame()
+    renderGameBoard()
+    startGame()
+  }) 
+
+}
+
+function renderBoardSelections() {
+  const gameBoards = document.createElement("div")
+  gameBoards.className = 'game-boards-container'
+  const boardOneImage = document.createElement("img")
+  boardOneImage.src = 'background.png'
+  boardOneImage.alt = 'board one'
+  boardOneImage.classList = 'board-image board-one'
+  const boardTwoImage = document.createElement("img")
+  boardTwoImage.src = 'test-2.png'
+  boardTwoImage.alt = 'board two'
+  boardTwoImage.classList = 'board-image board-two'
+
+  gameBoards.append(boardOneImage, boardTwoImage)
+  content.append(gameBoards)
+}
+
 function startGame(){
   startTimer()
   renderGameBoard()
+  document.addEventListener("keydown", handleKey);
+  document.addEventListener('keydown', changeCharacterDirection)
 }
 
 function renderGameBoard(){
@@ -271,6 +331,7 @@ function updateGame(results){
 
 
 
+
 // createWelcome()
 
 
@@ -278,7 +339,7 @@ function updateGame(results){
 //   const playerNameForm = document.createElement('form')
 //   playerNameForm.classList = 'name-form'
 
-//   playerNameForm.addEventListener('submit', addPlayerToDatabase)
+//   
 
 //   const username = document.createElement('input')
 //   username.setAttribute('type', "text")
@@ -295,18 +356,3 @@ function updateGame(results){
 
 // }
 
-
-function addPlayerToDatabase(e){
-  e.preventDefault()
-  username = e.target.username.value
-
-  fetch('http://localhost:3000/players', {
-    method : "POST",
-    headers: {
-      'Content-Type' : 'application/json'
-    },
-    body: JSON.stringify({username})
-  })
-  .then(response => response.json())
-  .then(console.log)
-}
