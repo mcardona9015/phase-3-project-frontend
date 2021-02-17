@@ -19,7 +19,7 @@ let position, grid, startingGridItem, startingPosition, gameOver, timer
 let time = 0.0, score = parseInt(scoreP.innerText)
 console.log('score: ', score);
 
-window.addEventListener('load', )
+
 
 window.addEventListener("keydown", handleKey);
 document.addEventListener('keydown', changeCharacterDirection)
@@ -44,7 +44,7 @@ startStopButton.addEventListener('click',(e) => {
 
 
 function fetchPlayer(){
-  return fetch('http://localhost:3000/players/1')
+  return fetch('http://localhost:3000/players/2')
   .then(response => response.json())
 }
 
@@ -94,7 +94,8 @@ function getGrid(playerData){
 
   mazeImage = document.createElement('img')
   mazeImage.classList = "maze-image"
-  mazeImage.src = 'new.png'
+  mazeImage.src = 'test-2.png'
+  // mazeImage.src = 'new.png'
   container.prepend(mazeImage)
   grid = {x, y, notAllowed, goalCoord, trophies}
   return grid
@@ -146,7 +147,7 @@ function handleKey(e) {
 
   switch (e.keyCode) {
     case keys.left:
-      if (position.y > 2 && !document.querySelector(`#grid-item-${position.x}-${position.y -1}`).classList.contains("not-allowed")) 
+      if (position.y > 1 && !document.querySelector(`#grid-item-${position.x}-${position.y -1}`).classList.contains("not-allowed")) 
       {position.y--} ;
       
       break;
@@ -156,7 +157,7 @@ function handleKey(e) {
       break;
 
     case keys.right:
-      if (position.y < grid.y - 1 && !document.querySelector(`#grid-item-${position.x}-${position.y+1}`).classList.contains("not-allowed")) 
+      if (position.y < grid.y && !document.querySelector(`#grid-item-${position.x}-${position.y+1}`).classList.contains("not-allowed")) 
       {position.y++};
       break;
 
