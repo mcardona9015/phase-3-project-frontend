@@ -85,15 +85,18 @@ function renderStartMenu() {
 }
 
 function createGameInstance(e){
-  boardId = e.target.dataset.id
-  let newGame = {player_id: player.id, board_id: boardId}
-  clearContent()
-  createNewGame(newGame)
-  renderGameBoard(boardId)
-  renderGameInfo()
+  if (e.target.classList.contains("board-image")){
+    boardId = e.target.dataset.id
+    let newGame = {player_id: player.id, board_id: boardId}
+    clearContent()
+    createNewGame(newGame)
+    renderGameBoard(boardId)
+    renderGameInfo()
+  
+    let startBtn = document.querySelector('.start-game')
+    startBtn.addEventListener('click', startGame)
+  }
 
-  let startBtn = document.querySelector('.start-game')
-  startBtn.addEventListener('click', startGame)
 }
 
 
@@ -110,6 +113,11 @@ function createNewGame(game) {
 }
 
 function renderBoardSelections() {
+  const gameSelectionScreen = document.createElement('div')
+  gameSelectionScreen.className = 'game-selection'
+  const header = document.createElement('h2')
+  header.className = 'board-selection-header'
+  header.innerText = 'Select your stage!'
   const gameBoards = document.createElement("div")
   gameBoards.className = 'game-boards-container'
   const boardOneImage = document.createElement("img")
@@ -124,7 +132,8 @@ function renderBoardSelections() {
   boardTwoImage.classList = 'board-image board-two'
 
   gameBoards.append(boardOneImage, boardTwoImage)
-  content.append(gameBoards)
+  gameSelectionScreen.append(header, gameBoards)
+  content.append(gameSelectionScreen)
 }
 
 function startGame(){
