@@ -65,6 +65,7 @@ playerNameForm.addEventListener('submit', (e) => {
   e.preventDefault();
   let username = e.target.username.value.toLowerCase();
   fetchAllPlayers().then(data => findPlayer(data, username))
+  renderStartMenu()
 })
 
 function findPlayer(playerArray, username) {
@@ -72,7 +73,6 @@ function findPlayer(playerArray, username) {
   if (player == undefined) {
     addPlayerToDatabase(username)
   }
-  renderStartMenu()
 }
 
 ////////////////////
