@@ -48,57 +48,6 @@ function addPlayerToDatabase(username){
   .then(data => player = data)
 }
 
-playerNameForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  let username = e.target.username.value.toLowerCase();
-  fetchAllPlayers().then(data => findPlayer(data, username))
-  clearContent()
-  renderStartMenu()
-})
-
-// startBtn.addEventListener('click',(e) => {
-//   if (e.target.className === "start-game") {
-//     e.target.innerText = "Stop Game"
-//     startGame()
-//   }
-//   if (e.target.className === "stop-game") {
-//     e.target.innerText = "Start Game"
-//     quitGame()
-//   }
-//   e.target.classList.toggle("stop-game")
-//   e.target.classList.toggle("start-game")
-// })
-
-function findPlayer(playerArray, username) {
-  player = playerArray.find(player => player.username === username)
-  if (player == undefined) {
-    addPlayerToDatabase(username)
-  }
-}
-
-////////////////////
-
-function renderStartMenu() {
-  renderBoardSelections()
-  const gameBoardsContainer = document.querySelector('.game-boards-container')
-  gameBoardsContainer.addEventListener('click', createGameInstance) 
-}
-
-function createGameInstance(e){
-  if (e.target.classList.contains("board-image")){
-    boardId = e.target.dataset.id
-    let newGame = {player_id: player.id, board_id: boardId}
-    clearContent()
-    createNewGame(newGame)
-    renderGameBoard(boardId)
-    renderGameInfo()
-  
-    let startBtn = document.querySelector('.start-game')
-    startBtn.addEventListener('click', startGame)
-  }
-
-}
-
 
 function createNewGame(game) {
   fetch('http://localhost:3000/games', {
@@ -110,6 +59,77 @@ function createNewGame(game) {
   })
   .then(response => response.json())
   .then(data => currentGame = data)
+}
+
+playerNameForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  let username = e.target.username.value.toLowerCase();
+  fetchAllPlayers().then(data => findPlayer(data, username))
+})
+
+function findPlayer(playerArray, username) {
+  player = playerArray.find(player => player.username === username)
+  if (player == undefined) {
+    addPlayerToDatabase(username)
+  }
+  renderStartMenu()
+}
+
+////////////////////
+
+function renderStartMenu() {
+  clearContent()
+  renderBoardSelections()
+  const gameBoardsContainer = document.querySelector('.game-boards-container')
+  gameBoardsContainer.addEventListener('click', createGameInstance) 
+  showPlayerStats()
+}
+
+function showPlayerStats(){
+  let gameScreen = document.querySelector('.game-selection')
+
+  const playerStatsDiv = document.createElement('div')
+  playerStatsDiv.className = 'player-stats-container'
+
+  const playerStatsList = document.createElement('ol')
+  playerStatsList.className = 'stats-list'
+
+  let gamesArray = player.games.slice(Math.max(player.games.length - 5, 0))
+
+  gamesArray.forEach(game => {
+    const statsLi = document.createElement('li')
+    statsLi.className = 'game-stats'
+    statsLi.textContent = `Score: ${game.score}, Time: ${game.time}`
+    playerStatsList.append(statsLi)
+  })
+
+  playerStatsDiv.append(playerStatsList)
+  gameScreen.append(playerStatsDiv)
+}
+
+function createGameInstance(e){
+  if (e.target.classList.contains("board-image")){
+    boardId = e.target.dataset.id
+    clearContent()
+    fetchCharacter()
+    renderGameBoard(boardId)
+    renderGameInfo()
+  
+    let startBtn = document.querySelector('.start-game')
+    startBtn.addEventListener('click',(e) => {
+    if (e.target.className === "start-game") {
+      e.target.innerText = "Quit Game"
+      startGame()
+    }
+    if (e.target.className === "quit-game") {
+      quitGame()
+    }
+    e.target.classList.toggle("start-game")
+    e.target.classList.toggle("quit-game")
+  })
+    // startBtn.addEventListener('click', startGame)
+  }
+
 }
 
 function renderBoardSelections() {
@@ -144,20 +164,26 @@ function startGame(){
 
 function renderGameBoard(id){
   fetchBoard(id).then(getGrid).then(makeGrid)
-  fetchCharacter()
+  // fetchCharacter()
   fetchBoard(id).then(getStartingPosition).then(createCharacter)
   fetchBoard(id).then(createObstacle)
 }
 
 function renderGameInfo(){
+  gameScreen = document.createElement('div')
+  gameScreen.className = 'game-screen'
+
   container = document.createElement('div')
   container.classList = 'container grid'
 
+  startBtnDiv = document.createElement('div')
+  startBtnDiv.className = 'start-button-container'
   const startBtn = document.createElement('button')
   startBtn.classList = "start-game"
   startBtn.innerText = 'Start Game'
   
   const timer = document.createElement('p')
+  timer.className = 'timer-container'
   timer.textContent = 'Time: '
   const timerSpan = document.createElement('span')
   timerSpan.className = 'timer'
@@ -166,12 +192,15 @@ function renderGameInfo(){
   
   const score = document.createElement('p')
   score.textContent = 'Score: '
+  score.className = 'score-container'
   const scoreSpan = document.createElement('span')
   scoreSpan.className = 'score'
   scoreSpan.textContent = "0"
   score.append(scoreSpan)
   
-  content.append(container, timer, score, startBtn)
+  startBtnDiv.append(startBtn)
+  gameScreen.append(timer, score, startBtnDiv, container)
+  content.append(gameScreen)
 }
 
 function getStartingPosition(board) {
@@ -187,7 +216,7 @@ function createObstacle(board){
     let image = document.createElement('img')
     image.src = obstacleObj.pixel_art
     cell.append(image)
-    cell.classList = 'grid-item obstacle'
+    cell.classList = 'grid-item obstacle allowed'
   })
 }
 
@@ -235,17 +264,17 @@ function makeGrid(grid) {
 
     cell.id = `grid-item-${x}-${y}`
 
-    container.appendChild(cell).className = "grid-item"
+    container.appendChild(cell).className = "grid-item allowed"
     
     if (grid.goalCoord[0] == x && grid.goalCoord[1] == y){
-      cell.classList = "grid-item goal"
-      cell.innerText = 'Goal!'
+      cell.classList = "grid-item goal allowed"
+      // cell.style.backgroundImage = 'url("https://www.kindpng.com/picc/m/126-1263441_mario-flag-pixel-art-hd-png-download.png")'
     }
     if (grid.notAllowed.includes(`${x}-${y}`)){
       cell.classList = "grid-item not-allowed"
     }
     if (grid.trophies.includes(`${x}-${y}`)){
-      cell.classList = "grid-item trophy"
+      cell.classList = "grid-item trophy allowed"
       let trophyImage = document.createElement('img')
       trophyImage.className = 'trophy-image'
       trophyImage.src = 'coin.png'
@@ -293,7 +322,7 @@ function handleKey(e) {
   if (gridItem.classList.contains('trophy')){
     score += 100
     scoreSpan.innerText = score
-    gridItem.classList = 'grid-item'
+    gridItem.classList = 'grid-item allowed'
     gridItem.querySelector('.trophy-image').remove()
 
   }
@@ -330,9 +359,9 @@ function incrementTimer(){
 
 function endTimer(){
   clearInterval(timer)
-  let timerSpan = document.querySelector('.timer')
+  // let timerSpan = document.querySelector('.timer')
   time = 0.0
-  timerSpan.innerText = time
+  // timerSpan.innerText = time
 }
 
 function clearScore(){
@@ -343,10 +372,17 @@ function clearScore(){
 
 function winGame(){
   time = time.toFixed(1)
-  let results = {score, time}
-  updateGame(results)
-  resetBoard()
-  resetButton()
+  let results = {player_id: player.id, board_id: boardId, score, time}
+  let scoreContainer = document.querySelector('.score-container')
+  let timerContainer = document.querySelector('.timer-container')
+  scoreContainer.textContent = `Final Score: ${score}`
+  scoreContainer.style.fontSize = "xx-large"
+  timerContainer.textContent = `Final Time: ${time}`
+  timerContainer.style.fontSize = "xx-large"
+
+  resetCharacterEventListeners()
+  clearInterval(timer)
+  createNewGame(results)
   console.log("You win!")
 }
 
@@ -358,12 +394,16 @@ function loseGame(){
 }
 
 function quitGame(){
-  resetBoard()
+  score = 0
+  endTimer()
+  fetchPlayer(player.id).then(data => player = data)
+  renderStartMenu()
+  resetCharacterEventListeners()
 }
 
-function resetButton(){
-  startBtn.classList = "start-game"
-  startBtn.innerText = "Start Game"
+function resetCharacterEventListeners(){
+  document.removeEventListener("keydown", handleKey);
+  document.removeEventListener('keydown', changeCharacterDirection)
 }
 
 function resetBoard(){
@@ -372,6 +412,10 @@ function resetBoard(){
   clearScore()
   container.style.setProperty("--grid-rows", 0);
   container.style.setProperty("--grid-cols", 0);
+}
+
+function deleteGame() {
+  console.log("delete?")
 }
 
 function updateGame(results){
