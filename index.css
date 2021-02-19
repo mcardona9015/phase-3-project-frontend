@@ -13,7 +13,8 @@
 
 html {
   background-color: var(--pink);
-  font-family: 'LLPixel', 'Impact';
+  font-family: 'Symtext'
+  /* , 'LLPixel', 'Impact'; */
   /* font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif */
 
 }
@@ -35,7 +36,7 @@ header {
   width: 100%;
   height: 100%;
   background-color: rgb(65, 0, 0);
-  background-image: url('MazeMaster_Banner.png');
+  background-image: url('assets/images/MazeMaster_Banner.png');
   color: #fff;
   text-align: center;
   text-justify: center;
@@ -110,7 +111,7 @@ header h1{
   width: 37.5rem;
   height: 37.5rem;
   border: 2px solid rgb(0, 0, 0);
-  background-image: url('MazeMaster_Preview.png');
+  background-image: url('assets/images/MazeMaster_Preview.png');
   box-shadow: 10px 5px 5px rgb(82, 82, 82);
   opacity: 0.65;
 }
@@ -130,6 +131,8 @@ header h1{
   grid-row: 1;
   grid-column: 1 / -1;
   font-size: 4rem;
+  text-align: center;
+  margin: 0;
 }
 
 .player-stats-container {
@@ -137,11 +140,44 @@ header h1{
   grid-row: 2;
   align-self: start;
   justify-self: center;
+  text-align: center;
   width: 25rem;
-  height: 30rem;
-  font-size: 2.5rem;
+  height: 40rem;
+  font-size: 1.75rem;
   border: 3px solid var(--muji);
+  padding-left: 1rem;
   /* color: var(--muji) */
+}
+
+.stats-header {
+  margin: 0;
+  padding: 0;
+  font-size: 1.9rem;
+}
+
+.stats-list {
+  display: grid;
+
+  text-align: left;
+}
+
+.game-stats {
+  grid-column: 1;
+}
+
+.stats-list .delete-btn {
+  grid-column: 2;
+  height: 3rem;
+  width: 3rem;
+  place-self: center;
+  background-color: var(--muji);
+  color: var(--pink);
+}
+
+.stats-list .delete-btn:hover {
+  box-shadow: 5px 2px 2px rgb(82, 82, 82);
+  transform: scale(1.1);
+  border-color: rgb(82, 82, 82);
 }
 
 .game-boards-container {
@@ -221,14 +257,14 @@ header h1{
 }
 
 .start-game {
-  background-image: url('MazeMaster_Play.png');
+  background-image: url('assets/images/MazeMaster_Play.png');
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
 }
 
 .quit-game {
-  background-image: url('MazeMaster_Quit.png');
+  background-image: url('assets/images/MazeMaster_Quit.png');
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
@@ -260,21 +296,29 @@ header h1{
 
 .grid-item.goal {
   /* background-image: url("https://www.vhv.rs/dpng/d/334-3340211_mario-flag-pixel-art-hd-png-download.png"); */
-  background-image: url("door.png") !important;
+  background-image: url("assets/images/door.png")!important;
   /* background-image: url("MazeMaster_Flag.png"); */
-  background-size: contain;
+  /* background-size: contain; */
+  /* overflow: hidden; */
 }
+
+/* .grid-item.goal img {
+  width: 45px;
+  height: 45px;
+  position: relative;
+  place-self: center;
+} */
 
 .grid-item.allowed {
   background-color: rgb(245, 235, 235);
-  background-image: url("grey-brick-floor-tile.png");
+  /* background-image: url("grey-brick-floor-tile.png"); */
   /* background-image: url("brick-floor-tile.png"); */
   /* background-image: url("grass-floor-tile.png"); */
 }
 
 .grid-item.not-allowed {
   background-color: var(--muji);
-  background-image: url("red-wall-tile.png");
+  /* background-image: url("red-wall-tile.png"); */
   /* background-image: url("blue-wall-tile.png"); */
 }
 
@@ -346,15 +390,13 @@ header h1{
   position: relative; */
 }
 
-.trophy-container {
+/* .trophy-container {
   display: grid;
   width: 40px;
   height:40px;
   overflow: hidden;
   position: relative;
-  
-
-}
+} */
 
 
 

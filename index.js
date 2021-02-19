@@ -61,12 +61,27 @@ function createNewGame(game) {
   .then(data => currentGame = data)
 }
 
+function deleteGame(e) {
+  if (e.target.className === "delete-btn"){  
+    const id = e.target.dataset.id 
+    e.target.previousElementSibling.remove()
+    e.target.remove()
+    fetch(`http://localhost:3000/games/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+  }
+}
+
 playerNameForm.addEventListener('submit', (e) => {
   e.preventDefault();
   let username = e.target.username.value.toLowerCase();
   fetchAllPlayers().then(data => findPlayer(data, username))
   renderStartMenu()
 })
+
 
 function findPlayer(playerArray, username) {
   player = playerArray.find(player => player.username === username)
@@ -93,7 +108,7 @@ function showPlayerStats(){
 
   const statsHeader = document.createElement('h3')
   statsHeader.className = 'stats-header'
-  statsHeader.textContent = "Your Best Games!"
+  statsHeader.textContent = "Your Recent Games!"
 
   const playerStatsList = document.createElement('ol')
   playerStatsList.className = 'stats-list'
@@ -104,11 +119,20 @@ function showPlayerStats(){
     const statsLi = document.createElement('li')
     statsLi.className = 'game-stats'
     statsLi.innerHTML = `Score: ${game.score} <br/>Time: ${game.time}`
-    playerStatsList.append(statsLi)
+
+    const deleteStatBtn = document.createElement('button')
+    deleteStatBtn.dataset.id = game.id
+    deleteStatBtn.className = "delete-btn"
+    deleteStatBtn.textContent = 'X'
+
+    // statsLi.append(deleteStatBtn)
+    playerStatsList.prepend(statsLi, deleteStatBtn)
   })
 
   playerStatsDiv.append(statsHeader, playerStatsList)
   gameScreen.append(playerStatsDiv)
+
+  playerStatsDiv.addEventListener('click', deleteGame)
 }
 
 function createGameInstance(e){
@@ -146,12 +170,12 @@ function renderBoardSelections() {
   gameBoards.className = 'game-boards-container'
   const boardOneImage = document.createElement("img")
   boardOneImage.dataset.id = 1
-  boardOneImage.src = 'background.png'
+  boardOneImage.src = 'assets/images/board-1.png'
   boardOneImage.alt = 'board one'
   boardOneImage.classList = 'board-image board-one'
   const boardTwoImage = document.createElement("img")
   boardTwoImage.dataset.id = 2
-  boardTwoImage.src = 'test-2.png'
+  boardTwoImage.src = 'assets/images/board-2.png'
   boardTwoImage.alt = 'board two'
   boardTwoImage.classList = 'board-image board-two'
 
@@ -219,7 +243,7 @@ function createObstacle(board){
     let cell = document.querySelector(`#grid-item-${coordinate}`)
     let image = document.createElement('img')
     // image.src = obstacleObj.pixel_art
-    image.src = 'pixel-bomb.png'
+    image.src = 'assets/images/pixel-bomb.png'
     cell.append(image)
     cell.classList = 'grid-item obstacle allowed'
   })
@@ -233,7 +257,7 @@ function createCharacter(startingPosition){
   
   let characterImg = document.createElement('img')
   characterImg.classList = "Character_spritesheet pixelart face-down"
-  characterImg.src = 'game-character.png'
+  characterImg.src = 'assets/images/game-character.png'
   
   startingGridItem = document.querySelector(`#grid-item-${startingPosition[0]}-${startingPosition[1]}`);
   characterDiv.append(characterImg)
@@ -246,8 +270,8 @@ function getGrid(board){
   let x = board.grid_size[0]
   let y = board.grid_size[1]
   const goalCoord = board.goal_coordinates
-  if (board.id == 1){container.style.backgroundImage = 'url("background.png")'}
-  if (board.id == 2){container.style.backgroundImage = 'url("test-2.png")'}
+  if (board.id == 1){container.style.backgroundImage = 'url("assets/images/board-1.png")'}
+  if (board.id == 2){container.style.backgroundImage = 'url("assets/images/board-2.png")'}
   grid = {x, y, notAllowed, goalCoord, trophies}
   return grid
 }
@@ -271,13 +295,34 @@ function makeGrid(grid) {
     // cell.textContent = `${x}-${y}`
 
     container.appendChild(cell).className = "grid-item allowed"
+
+      if (boardId == 1){
+        cell.style.backgroundImage = 'url("assets/images/grass-floor-tile.png")'
+      }
+      if (boardId == 2){
+        cell.style.backgroundImage = 'url("assets/images/grey-brick-floor-tile.png")'
+      }
     
     if (grid.goalCoord[0] == x && grid.goalCoord[1] == y){
       cell.classList = "grid-item goal allowed"
-      // cell.style.backgroundImage = 'url("https://www.kindpng.com/picc/m/126-1263441_mario-flag-pixel-art-hd-png-download.png")'
+      // if (boardId == 1){
+      //   const flagImage = document.createElement('img')
+      //   flagImage.className = 'flag-image'
+      //   flagImage.src = "assets/images/MazeMaster_Flag.png"
+      //   cell.append(flagImage)
+      // }
+      // if (boardId == 2){
+      //   cell.style.backgroundImage = 'url("assets/images/door.png")'
+      // }
     }
     if (grid.notAllowed.includes(`${x}-${y}`)){
       cell.classList = "grid-item not-allowed"
+      if (boardId == 1){
+        cell.style.backgroundImage = 'url("assets/images/blue-wall-tile.png")'
+      }
+      if (boardId == 2){
+        cell.style.backgroundImage = 'url("assets/images/red-wall-tile.png")'
+      }
     }
     if (grid.trophies.includes(`${x}-${y}`)){
       cell.classList = "grid-item trophy allowed"
@@ -285,7 +330,7 @@ function makeGrid(grid) {
       // trophyContainer.className = "trophy-container"
       let trophyImage = document.createElement('img')
       trophyImage.className = 'trophy-image'
-      trophyImage.src = 'test-coin-gif.gif'
+      trophyImage.src = 'assets/images/test-coin-gif.gif'
       // trophyContainer.append(trophyImage)
       // cell.append(trophyContainer)
       // trophyImage.src = 'MazeMaster_Coin.png'
@@ -325,12 +370,12 @@ function handleKey(e) {
   {gridItem.appendChild(character)}
 
   if (gridItem.classList.contains('goal')){
-    let winSound = new Audio('SFX_-_positive_02.m4a');
+    let winSound = new Audio('assets/sounds/SFX_-_positive_02.m4a');
     winSound.play()
     winGame()
   }
   if (gridItem.classList.contains('obstacle')){
-    let bombSound = new Audio('SFX_-_explosion_03.m4a');
+    let bombSound = new Audio('assets/sounds/SFX_-_explosion_03.m4a');
     bombSound.play()
     loseGame()
   }
@@ -338,10 +383,9 @@ function handleKey(e) {
     score += 100
     scoreSpan.innerText = score
     gridItem.classList = 'grid-item allowed'
-    let coinSound = new Audio('SFX_-_coin_02.m4a');
+    let coinSound = new Audio('assets/sounds/SFX_-_coin_02.m4a');
     coinSound.play()
     gridItem.querySelector('.trophy-image').remove()
-
   }
 }
 
@@ -432,9 +476,6 @@ function resetBoard(){
   container.style.setProperty("--grid-cols", 0);
 }
 
-function deleteGame() {
-  console.log("delete?")
-}
 
 function updateGame(results){
   fetch(`http://localhost:3000/games/${currentGame.id}`, {
@@ -449,6 +490,3 @@ function updateGame(results){
 function clearContent(){
   Array.from(content.children).forEach(child => child.remove())
 }
-
-
-
