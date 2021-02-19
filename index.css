@@ -139,7 +139,7 @@ header h1{
   grid-column: 2;
   grid-row: 2;
   align-self: start;
-  justify-self: center;
+  justify-self: start;
   text-align: center;
   width: 25rem;
   height: 40rem;
@@ -185,7 +185,7 @@ header h1{
   grid-column: 1;
   display: grid;
   gap: 40px;
-  grid-template-columns: repeat(auto-fit, minmax(20rem, 576px));
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 500px));
   place-items: space-evenly;
   width: 100%;
   height: 100%;
@@ -203,8 +203,8 @@ header h1{
   border: 1px solid rgb(2, 2, 2);
   box-shadow: 5px 5px 5px rgb(82, 82, 82);
   background-color: rgb(245, 235, 235);
-  /* width: 100%;
-  height: 100%; */
+  width: 500px;
+  height: 500px;
   object-fit: contain;
 }
 
