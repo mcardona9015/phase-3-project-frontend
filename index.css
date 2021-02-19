@@ -240,6 +240,7 @@ header h1{
 .grid-item.not-allowed {
   background-color: var(--muji);
   background-image: url("red-wall-tile.png");
+  /* background-image: url("blue-wall-tile.png"); */
 }
 
 .Character {
