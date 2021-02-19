@@ -225,16 +225,21 @@ header h1{
 }
 
 .grid-item.goal {
-  background-image: url("https://www.vhv.rs/dpng/d/334-3340211_mario-flag-pixel-art-hd-png-download.png");
+  /* background-image: url("https://www.vhv.rs/dpng/d/334-3340211_mario-flag-pixel-art-hd-png-download.png"); */
+  background-image: url("door.png") !important;
   background-size: contain;
 }
 
 .grid-item.allowed {
   background-color: rgb(245, 235, 235);
+  background-image: url("grey-brick-floor-tile.png");
+  /* background-image: url("brick-floor-tile.png"); */
+  /* background-image: url("grass-floor-tile.png"); */
 }
 
 .grid-item.not-allowed {
   background-color: var(--muji);
+  background-image: url("red-wall-tile.png");
 }
 
 .Character {
@@ -244,6 +249,7 @@ header h1{
   overflow: hidden;
   position: relative;
   margin-bottom: 2.5em;
+  z-index:1;
 }
 
 .Character_spritesheet {
@@ -286,17 +292,32 @@ header h1{
 }
 
 .obstacle img {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   position: relative;
   place-self: center;
 }
 
 .trophy img {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   position: relative;
   place-self: center;
+
+  /* animation: moveSpritesheet 1s steps(4) infinite;
+  width: 136px;
+  height: 40px;
+  position: relative; */
+}
+
+.trophy-container {
+  display: grid;
+  width: 40px;
+  height:40px;
+  overflow: hidden;
+  position: relative;
+  
+
 }
 
 

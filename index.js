@@ -214,7 +214,8 @@ function createObstacle(board){
   obstacleCoordinates.forEach(coordinate => {
     let cell = document.querySelector(`#grid-item-${coordinate}`)
     let image = document.createElement('img')
-    image.src = obstacleObj.pixel_art
+    // image.src = obstacleObj.pixel_art
+    image.src = 'pixel-bomb.png'
     cell.append(image)
     cell.classList = 'grid-item obstacle allowed'
   })
@@ -228,7 +229,7 @@ function createCharacter(startingPosition){
   
   let characterImg = document.createElement('img')
   characterImg.classList = "Character_spritesheet pixelart face-down"
-  characterImg.src = character.pixel_art
+  characterImg.src = 'game-character.png'
   
   startingGridItem = document.querySelector(`#grid-item-${startingPosition[0]}-${startingPosition[1]}`);
   characterDiv.append(characterImg)
@@ -275,9 +276,13 @@ function makeGrid(grid) {
     }
     if (grid.trophies.includes(`${x}-${y}`)){
       cell.classList = "grid-item trophy allowed"
+      // let trophyContainer = document.createElement("div")
+      // trophyContainer.className = "trophy-container"
       let trophyImage = document.createElement('img')
       trophyImage.className = 'trophy-image'
-      trophyImage.src = 'coin.png'
+      trophyImage.src = 'test-coin-gif.gif'
+      // trophyContainer.append(trophyImage)
+      // cell.append(trophyContainer)
       cell.append(trophyImage)
     }
   }
@@ -314,15 +319,21 @@ function handleKey(e) {
   {gridItem.appendChild(character)}
 
   if (gridItem.classList.contains('goal')){
+    let winSound = new Audio('SFX_-_positive_02.m4a');
+    winSound.play()
     winGame()
   }
   if (gridItem.classList.contains('obstacle')){
+    let bombSound = new Audio('SFX_-_explosion_03.m4a');
+    bombSound.play()
     loseGame()
   }
   if (gridItem.classList.contains('trophy')){
     score += 100
     scoreSpan.innerText = score
     gridItem.classList = 'grid-item allowed'
+    let coinSound = new Audio('SFX_-_coin_02.m4a');
+    coinSound.play()
     gridItem.querySelector('.trophy-image').remove()
 
   }
