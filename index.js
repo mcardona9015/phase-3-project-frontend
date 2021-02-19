@@ -82,7 +82,7 @@ function renderStartMenu() {
   renderBoardSelections()
   const gameBoardsContainer = document.querySelector('.game-boards-container')
   gameBoardsContainer.addEventListener('click', createGameInstance) 
-  showPlayerStats()
+  setTimeout(showPlayerStats, 100)
 }
 
 function showPlayerStats(){
@@ -402,7 +402,8 @@ function quitGame(){
   score = 0
   endTimer()
   fetchPlayer(player.id).then(data => player = data)
-  renderStartMenu()
+  setTimeout(renderStartMenu, 100)
+  // renderStartMenu()
   resetCharacterEventListeners()
 }
 
