@@ -6,15 +6,15 @@
   --muji: rgb(65, 0, 0);
 }
 
-@font-face {
+/* @font-face {
   font-family: "LLPixel";
   src: local("LLPixel3")
-}
+} */
 
 html {
-  /* display: grid; */
   background-color: var(--pink);
-  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif
+  font-family: 'LLPixel', 'Impact';
+  /* font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif */
 
 }
 
@@ -26,7 +26,6 @@ body {
   height: 100%;
   place-content: center;
   place-items: center;
-  /* font-family: 'LLPixel'; */
 }
 
 header {
@@ -59,7 +58,6 @@ header h1{
   grid-template-rows: repeat (3 1fr); */
   place-items: center;
   margin-top: 3rem;
-  font-family: 'LLPixel'
 }
 
 
@@ -208,7 +206,7 @@ header h1{
 }
 
 .game-screen button {
-  background-color: var(--muji);
+  /* background-color: var(--muji); */
   color: #fff;
   border-radius:10px;
   width: 7rem;
@@ -220,6 +218,20 @@ header h1{
   box-shadow: 8px 5px 5px rgb(82, 82, 82);
   transform: scale(1.1);
   border-color: rgb(82, 82, 82);
+}
+
+.start-game {
+  background-image: url('MazeMaster_Play.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.quit-game {
+  background-image: url('MazeMaster_Quit.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 .start-button-container {

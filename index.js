@@ -91,6 +91,10 @@ function showPlayerStats(){
   const playerStatsDiv = document.createElement('div')
   playerStatsDiv.className = 'player-stats-container'
 
+  const statsHeader = document.createElement('h3')
+  statsHeader.className = 'stats-header'
+  statsHeader.textContent = "Your Best Games!"
+
   const playerStatsList = document.createElement('ol')
   playerStatsList.className = 'stats-list'
 
@@ -99,11 +103,11 @@ function showPlayerStats(){
   gamesArray.forEach(game => {
     const statsLi = document.createElement('li')
     statsLi.className = 'game-stats'
-    statsLi.textContent = `Score: ${game.score}, Time: ${game.time}`
+    statsLi.innerHTML = `Score: ${game.score} <br/>Time: ${game.time}`
     playerStatsList.append(statsLi)
   })
 
-  playerStatsDiv.append(playerStatsList)
+  playerStatsDiv.append(statsHeader, playerStatsList)
   gameScreen.append(playerStatsDiv)
 }
 
@@ -118,7 +122,7 @@ function createGameInstance(e){
     let startBtn = document.querySelector('.start-game')
     startBtn.addEventListener('click',(e) => {
     if (e.target.className === "start-game") {
-      e.target.innerText = "Quit Game"
+      // e.target.innerText = "Quit Game"
       startGame()
     }
     if (e.target.className === "quit-game") {
@@ -137,7 +141,7 @@ function renderBoardSelections() {
   gameSelectionScreen.className = 'game-selection'
   const header = document.createElement('h2')
   header.className = 'board-selection-header'
-  header.innerText = 'Select your stage!'
+  header.innerText = 'SELECT A BOARD'
   const gameBoards = document.createElement("div")
   gameBoards.className = 'game-boards-container'
   const boardOneImage = document.createElement("img")
@@ -180,7 +184,7 @@ function renderGameInfo(){
   startBtnDiv.className = 'start-button-container'
   const startBtn = document.createElement('button')
   startBtn.classList = "start-game"
-  startBtn.innerText = 'Start Game'
+  // startBtn.innerText = 'Start Game'
   
   const timer = document.createElement('p')
   timer.className = 'timer-container'
@@ -263,6 +267,7 @@ function makeGrid(grid) {
     }    
 
     cell.id = `grid-item-${x}-${y}`
+    // cell.textContent = `${x}-${y}`
 
     container.appendChild(cell).className = "grid-item allowed"
     
