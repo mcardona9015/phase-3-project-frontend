@@ -277,7 +277,7 @@ function makeGrid(grid) {
       cell.classList = "grid-item trophy allowed"
       let trophyImage = document.createElement('img')
       trophyImage.className = 'trophy-image'
-      trophyImage.src = 'coin.png'
+      trophyImage.src = 'MazeMaster_Coin.png'
       cell.append(trophyImage)
     }
   }

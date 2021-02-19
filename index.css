@@ -6,6 +6,11 @@
   --muji: rgb(65, 0, 0);
 }
 
+@font-face {
+  font-family: "LLPixel";
+  src: local("LLPixel3")
+}
+
 html {
   /* display: grid; */
   background-color: var(--pink);
@@ -21,6 +26,7 @@ body {
   height: 100%;
   place-content: center;
   place-items: center;
+  /* font-family: 'LLPixel'; */
 }
 
 header {
@@ -30,6 +36,7 @@ header {
   width: 100%;
   height: 100%;
   background-color: rgb(65, 0, 0);
+  background-image: url('MazeMaster_Banner.png');
   color: #fff;
   text-align: center;
   text-justify: center;
@@ -48,17 +55,28 @@ header h1{
   width: 100%;
   height: 100%;
   display: grid;
-  /* grid-template-columns: repeat (3 1fr); */
-  /* grid-template-rows: repeat (3 1fr); */
+  /* grid-template-columns: repeat (3 1fr);
+  grid-template-rows: repeat (3 1fr); */
   place-items: center;
   margin-top: 3rem;
+  font-family: 'LLPixel'
 }
 
 
 /* Home Page */
+#welcome-page {
+  display: grid;
+  grid-template-rows: 5rem 5rem 50rem;
+  grid-template-columns: 1fr;
+}
+
+#welcome-page h2 {
+  grid-row: 1;
+  place-self: center;
+}
 
 .name-form {
-  /* grid-row: 2; */
+  grid-row: 2;
   /* grid-column: 2; */
   display: grid;
   grid-template-columns: 1fr;
@@ -69,7 +87,7 @@ header h1{
 .name-form input {
   border-radius: 10px;
   text-align: center;
-  background-color: rgb(255, 193, 227);
+  background-color: rgb(245, 178, 196);
 }
 
 .name-form input[type=text] {
@@ -85,12 +103,18 @@ header h1{
 .name-form input[type=submit] {
   grid-row: 2;
   height: 1.5rem;
-  width: 15rem
+  width: 15rem;
 }
 
 #game-preview {
-  border: 3px solid rgb(0, 0, 0);
-
+  grid-row: 3;
+  grid-column: 1 / -1;
+  width: 37.5rem;
+  height: 37.5rem;
+  border: 2px solid rgb(0, 0, 0);
+  background-image: url('MazeMaster_Preview.png');
+  box-shadow: 10px 5px 5px rgb(82, 82, 82);
+  opacity: 0.65;
 }
 
 /* Stage Selection */
@@ -133,6 +157,7 @@ header h1{
   height: 100%;
 }
 
+
 .board-image {
   /* width: 576px; */
   /* min-width: 288px;
@@ -153,7 +178,7 @@ header h1{
 .game-boards-container img:hover {
   box-shadow: 10px 5px 5px rgb(82, 82, 82);
   background-color:rgb(182, 182, 182);
-  /* opacity:0.5; */
+  opacity:0.75;
   border-radius:10px;
 }
 
@@ -172,12 +197,14 @@ header h1{
   grid-row: 3;
   font-size: large;
   font-weight: bold;
+  place-self: center;
 }
 
 .score-container {
   grid-row: 3;
   font-size: large;
   font-weight: bold;
+  place-self: center;
 }
 
 .game-screen button {
@@ -212,11 +239,6 @@ header h1{
   background-repeat: no-repeat;
 }
 
-/* .maze-image {
-  position: absolute;
-  opacity: 0.5;
-} */
-
 .grid-item {
   display: grid;
   place-content: center;
@@ -225,7 +247,7 @@ header h1{
 }
 
 .grid-item.goal {
-  background-image: url("https://www.vhv.rs/dpng/d/334-3340211_mario-flag-pixel-art-hd-png-download.png");
+  background-image: url("MazeMaster_Flag.png");
   background-size: contain;
 }
 
@@ -286,15 +308,15 @@ header h1{
 }
 
 .obstacle img {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   position: relative;
   place-self: center;
 }
 
 .trophy img {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   position: relative;
   place-self: center;
 }
