@@ -2,13 +2,9 @@
 
 const body = document.querySelector("body");
 const content = body.querySelector(".content");
-const container = document.querySelector(".grid");
 const gridNodes = document.querySelectorAll(".grid-item");
 const gridArray = Array.from(gridNodes);
 const gameInfo = document.querySelector(".game-info");
-const startStopButton = document.querySelector("#start-stop");
-const timerP = gameInfo.querySelector(".timer");
-const scoreP = gameInfo.querySelector(".score");
 const playerNameForm = document.querySelector(".name-form");
 const keys = {
   left: 37,
@@ -16,25 +12,46 @@ const keys = {
   right: 39,
   down: 40,
 };
-let position, grid, startingGridItem, startingPosition, gameOver, timer, player;
+let position,
+  grid,
+  startingGridItem,
+  startingPosition,
+  gameOver,
+  timer,
+  player,
+  container,
+  currentGame,
+  character,
+  boardId;
 let time = 0.0,
-  score = parseInt(scoreP.innerText);
-// console.log('score: ', score);
+  score = 0;
 
 function fetchAllPlayers() {
-  return fetch("http://localhost:3000/players").then((response) =>
+  return fetch("https://maze-master.herokuapp.com/players").then((response) =>
     response.json()
   );
 }
 
-function fetchPlayer() {
-  return fetch("http://localhost:3000/players/2").then((response) =>
-    response.json()
-  );
+function fetchPlayer(id) {
+  return fetch(
+    `https://maze-master.herokuapp.com/players/${id}`
+  ).then((response) => response.json());
+}
+
+function fetchBoard(id) {
+  return fetch(
+    `https://maze-master.herokuapp.com/boards/${id}`
+  ).then((response) => response.json());
+}
+
+function fetchCharacter() {
+  fetch("https://maze-master.herokuapp.com/characters/1")
+    .then((response) => response.json())
+    .then((data) => (character = data));
 }
 
 function addPlayerToDatabase(username) {
-  fetch("http://localhost:3000/players", {
+  fetch("https://maze-master.herokuapp.com/players", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -45,25 +62,37 @@ function addPlayerToDatabase(username) {
     .then((data) => (player = data));
 }
 
+function createNewGame(game) {
+  fetch("https://maze-master.herokuapp.com/games", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(game),
+  })
+    .then((response) => response.json())
+    .then((data) => (currentGame = data));
+}
+
+function deleteGame(e) {
+  if (e.target.className === "delete-btn") {
+    const id = e.target.dataset.id;
+    e.target.previousElementSibling.remove();
+    e.target.remove();
+    fetch(`https://maze-master.herokuapp.com/games/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
+}
+
 playerNameForm.addEventListener("submit", (e) => {
   e.preventDefault();
   let username = e.target.username.value.toLowerCase();
   fetchAllPlayers().then((data) => findPlayer(data, username));
-  playerNameForm.remove();
   renderStartMenu();
-});
-
-startStopButton.addEventListener("click", (e) => {
-  if (e.target.className === "start-game") {
-    e.target.innerText = "Stop Game";
-    startGame();
-  }
-  if (e.target.className === "stop-game") {
-    e.target.innerText = "Start Game";
-    quitGame();
-  }
-  e.target.classList.toggle("stop-game");
-  e.target.classList.toggle("start-game");
 });
 
 function findPlayer(playerArray, username) {
@@ -76,63 +105,164 @@ function findPlayer(playerArray, username) {
 ////////////////////
 
 function renderStartMenu() {
+  clearContent();
   renderBoardSelections();
   const gameBoardsContainer = document.querySelector(".game-boards-container");
-  gameBoardsContainer.addEventListener("click", () => {
-    createNewGame();
-    renderGameBoard();
-    startGame();
+  gameBoardsContainer.addEventListener("click", createGameInstance);
+  setTimeout(showPlayerStats, 100);
+}
+
+function showPlayerStats() {
+  let gameScreen = document.querySelector(".game-selection");
+
+  const playerStatsDiv = document.createElement("div");
+  playerStatsDiv.className = "player-stats-container";
+
+  const statsHeader = document.createElement("h3");
+  statsHeader.className = "stats-header";
+  statsHeader.textContent = "Your Recent Games!";
+
+  const playerStatsList = document.createElement("ol");
+  playerStatsList.className = "stats-list";
+
+  let gamesArray = player.games.slice(Math.max(player.games.length - 5, 0));
+
+  gamesArray.forEach((game) => {
+    const statsLi = document.createElement("li");
+    statsLi.className = "game-stats";
+    statsLi.innerHTML = `Score: ${game.score} <br/>Time: ${game.time}`;
+
+    const deleteStatBtn = document.createElement("button");
+    deleteStatBtn.dataset.id = game.id;
+    deleteStatBtn.className = "delete-btn";
+    deleteStatBtn.textContent = "X";
+
+    // statsLi.append(deleteStatBtn)
+    playerStatsList.prepend(statsLi, deleteStatBtn);
   });
+
+  playerStatsDiv.append(statsHeader, playerStatsList);
+  gameScreen.append(playerStatsDiv);
+
+  playerStatsDiv.addEventListener("click", deleteGame);
+}
+
+function createGameInstance(e) {
+  if (e.target.classList.contains("board-image")) {
+    boardId = e.target.dataset.id;
+    clearContent();
+    fetchCharacter();
+    renderGameBoard(boardId);
+    renderGameInfo();
+
+    let startBtn = document.querySelector(".start-game");
+    startBtn.addEventListener("click", (e) => {
+      if (e.target.className === "start-game") {
+        // e.target.innerText = "Quit Game"
+        startGame();
+      }
+      if (e.target.className === "quit-game") {
+        quitGame();
+      }
+      e.target.classList.toggle("start-game");
+      e.target.classList.toggle("quit-game");
+    });
+    // startBtn.addEventListener('click', startGame)
+  }
 }
 
 function renderBoardSelections() {
+  const gameSelectionScreen = document.createElement("div");
+  gameSelectionScreen.className = "game-selection";
+  const header = document.createElement("h2");
+  header.className = "board-selection-header";
+  header.innerText = "SELECT A BOARD";
   const gameBoards = document.createElement("div");
   gameBoards.className = "game-boards-container";
   const boardOneImage = document.createElement("img");
-  boardOneImage.src = "background.png";
+  boardOneImage.dataset.id = 1;
+  boardOneImage.src = "assets/images/board-1.png";
   boardOneImage.alt = "board one";
   boardOneImage.classList = "board-image board-one";
   const boardTwoImage = document.createElement("img");
-  boardTwoImage.src = "test-2.png";
+  boardTwoImage.dataset.id = 2;
+  boardTwoImage.src = "assets/images/board-2.png";
   boardTwoImage.alt = "board two";
   boardTwoImage.classList = "board-image board-two";
 
   gameBoards.append(boardOneImage, boardTwoImage);
-  content.append(gameBoards);
+  gameSelectionScreen.append(header, gameBoards);
+  content.append(gameSelectionScreen);
 }
 
 function startGame() {
   startTimer();
-  renderGameBoard();
   document.addEventListener("keydown", handleKey);
   document.addEventListener("keydown", changeCharacterDirection);
 }
 
-function renderGameBoard() {
-  fetchPlayer().then(getGrid).then(makeGrid);
-  fetchPlayer().then(createCharacter);
-  fetchPlayer().then(createObstacle);
+function renderGameBoard(id) {
+  fetchBoard(id).then(getGrid).then(makeGrid);
+  // fetchCharacter()
+  fetchBoard(id).then(getStartingPosition).then(createCharacter);
+  fetchBoard(id).then(createObstacle);
 }
 
-function createObstacle(playerData) {
-  let boardObstacleObj = playerData.games[0].board.board_obstacles[0];
-  let obstacleObj = playerData.games[0].board.obstacles.find(
+function renderGameInfo() {
+  gameScreen = document.createElement("div");
+  gameScreen.className = "game-screen";
+
+  container = document.createElement("div");
+  container.classList = "container grid";
+
+  startBtnDiv = document.createElement("div");
+  startBtnDiv.className = "start-button-container";
+  const startBtn = document.createElement("button");
+  startBtn.classList = "start-game";
+  // startBtn.innerText = 'Start Game'
+
+  const timer = document.createElement("p");
+  timer.className = "timer-container";
+  timer.textContent = "Time: ";
+  const timerSpan = document.createElement("span");
+  timerSpan.className = "timer";
+  timerSpan.textContent = "0";
+  timer.append(timerSpan);
+
+  const score = document.createElement("p");
+  score.textContent = "Score: ";
+  score.className = "score-container";
+  const scoreSpan = document.createElement("span");
+  scoreSpan.className = "score";
+  scoreSpan.textContent = "0";
+  score.append(scoreSpan);
+
+  startBtnDiv.append(startBtn);
+  gameScreen.append(timer, score, startBtnDiv, container);
+  content.append(gameScreen);
+}
+
+function getStartingPosition(board) {
+  return board.start_coordinates;
+}
+
+function createObstacle(board) {
+  let boardObstacleObj = board.board_obstacles[0];
+  let obstacleObj = board.obstacles.find(
     (obstacle) => obstacle.id === boardObstacleObj.obstacle_id
   );
   let obstacleCoordinates = boardObstacleObj.coordinates;
   obstacleCoordinates.forEach((coordinate) => {
     let cell = document.querySelector(`#grid-item-${coordinate}`);
     let image = document.createElement("img");
-    image.src = obstacleObj.pixel_art;
+    // image.src = obstacleObj.pixel_art
+    image.src = "assets/images/pixel-bomb.png";
     cell.append(image);
-    // cell.style.backgroundImage = `url(${obstacleObj.pixel_art})`
-    cell.classList = "grid-item obstacle";
+    cell.classList = "grid-item obstacle allowed";
   });
 }
 
-function createCharacter(playerData) {
-  let characterObj = playerData.games[0].characters[0];
-  startingPosition = playerData.games[0].board.start_coordinates;
+function createCharacter(startingPosition) {
   position = { x: startingPosition[0], y: startingPosition[1] };
 
   let characterDiv = document.createElement("div");
@@ -140,7 +270,7 @@ function createCharacter(playerData) {
 
   let characterImg = document.createElement("img");
   characterImg.classList = "Character_spritesheet pixelart face-down";
-  characterImg.src = characterObj.pixel_art;
+  characterImg.src = "assets/images/game-character.png";
 
   startingGridItem = document.querySelector(
     `#grid-item-${startingPosition[0]}-${startingPosition[1]}`
@@ -149,25 +279,23 @@ function createCharacter(playerData) {
   startingGridItem.append(characterDiv);
 }
 
-function getGrid(playerData) {
-  const board = playerData.games[0].board;
+function getGrid(board) {
   const notAllowed = board.not_allowed;
   const trophies = board.trophies;
   let x = board.grid_size[0];
   let y = board.grid_size[1];
   const goalCoord = board.goal_coordinates;
-  // mazeImage = document.createElement('img')
-  // mazeImage.classList = "maze-image"
-  // mazeImage.src = 'test-2.png'
-  // mazeImage.src = 'new.png'
-  // container.prepend(mazeImage)
+  if (board.id == 1) {
+    container.style.backgroundImage = 'url("assets/images/board-1.png")';
+  }
+  if (board.id == 2) {
+    container.style.backgroundImage = 'url("assets/images/board-2.png")';
+  }
   grid = { x, y, notAllowed, goalCoord, trophies };
   return grid;
 }
 
 function makeGrid(grid) {
-  // const container = document.createElement('div')
-  container.style.backgroundImage = 'url("test-2.png")';
   container.style.setProperty("--grid-rows", grid.y);
   container.style.setProperty("--grid-cols", grid.x);
 
@@ -183,20 +311,49 @@ function makeGrid(grid) {
     }
 
     cell.id = `grid-item-${x}-${y}`;
+    // cell.textContent = `${x}-${y}`
 
-    container.appendChild(cell).className = "grid-item";
+    container.appendChild(cell).className = "grid-item allowed";
+
+    if (boardId == 1) {
+      cell.style.backgroundImage = 'url("assets/images/grass-floor-tile.png")';
+    }
+    if (boardId == 2) {
+      cell.style.backgroundImage =
+        'url("assets/images/grey-brick-floor-tile.png")';
+    }
 
     if (grid.goalCoord[0] == x && grid.goalCoord[1] == y) {
-      cell.classList = "grid-item goal";
+      cell.classList = "grid-item goal allowed";
+      // if (boardId == 1){
+      //   const flagImage = document.createElement('img')
+      //   flagImage.className = 'flag-image'
+      //   flagImage.src = "assets/images/MazeMaster_Flag.png"
+      //   cell.append(flagImage)
+      // }
+      // if (boardId == 2){
+      //   cell.style.backgroundImage = 'url("assets/images/door.png")'
+      // }
     }
     if (grid.notAllowed.includes(`${x}-${y}`)) {
       cell.classList = "grid-item not-allowed";
+      if (boardId == 1) {
+        cell.style.backgroundImage = 'url("assets/images/blue-wall-tile.png")';
+      }
+      if (boardId == 2) {
+        cell.style.backgroundImage = 'url("assets/images/red-wall-tile.png")';
+      }
     }
     if (grid.trophies.includes(`${x}-${y}`)) {
-      cell.classList = "grid-item trophy";
+      cell.classList = "grid-item trophy allowed";
+      // let trophyContainer = document.createElement("div")
+      // trophyContainer.className = "trophy-container"
       let trophyImage = document.createElement("img");
       trophyImage.className = "trophy-image";
-      trophyImage.src = "coin.png";
+      trophyImage.src = "assets/images/test-coin-gif.gif";
+      // trophyContainer.append(trophyImage)
+      // cell.append(trophyContainer)
+      // trophyImage.src = 'MazeMaster_Coin.png'
       cell.append(trophyImage);
     }
   }
@@ -252,21 +409,28 @@ function handleKey(e) {
   let gridItem = document.querySelector(
     "#grid-item-" + position.x + "-" + position.y
   );
+  let scoreSpan = document.querySelector(".score");
 
   if (!gridItem.classList.contains("not-allowed")) {
     gridItem.appendChild(character);
   }
 
   if (gridItem.classList.contains("goal")) {
+    let winSound = new Audio("assets/sounds/SFX_-_positive_02.m4a");
+    winSound.play();
     winGame();
   }
   if (gridItem.classList.contains("obstacle")) {
+    let bombSound = new Audio("assets/sounds/SFX_-_explosion_03.m4a");
+    bombSound.play();
     loseGame();
   }
   if (gridItem.classList.contains("trophy")) {
     score += 100;
-    scoreP.innerText = score;
-    gridItem.classList = "grid-item";
+    scoreSpan.innerText = score;
+    gridItem.classList = "grid-item allowed";
+    let coinSound = new Audio("assets/sounds/SFX_-_coin_02.m4a");
+    coinSound.play();
     gridItem.querySelector(".trophy-image").remove();
   }
 }
@@ -294,46 +458,59 @@ function startTimer() {
 }
 
 function incrementTimer() {
+  let timerSpan = document.querySelector(".timer");
   time += 0.1;
-  timerP.innerText = time.toFixed(1);
+  timerSpan.innerText = time.toFixed(1);
 }
 
 function endTimer() {
   clearInterval(timer);
+  // let timerSpan = document.querySelector('.timer')
   time = 0.0;
-  timerP.innerText = time;
+  // timerSpan.innerText = time
 }
 
 function clearScore() {
+  let scoreSpan = document.querySelector(".score");
   score = 0;
-  scoreP.innerText = score;
+  scoreSpan.innerText = score;
 }
 
 function winGame() {
   time = time.toFixed(1);
-  let results = { score, time };
-  updateGame(results);
-  resetBoard();
-  resetButton();
+  let results = { player_id: player.id, board_id: boardId, score, time };
+  let scoreContainer = document.querySelector(".score-container");
+  let timerContainer = document.querySelector(".timer-container");
+  scoreContainer.textContent = `Final Score: ${score}`;
+  scoreContainer.style.fontSize = "xx-large";
+  timerContainer.textContent = `Final Time: ${time}`;
+  timerContainer.style.fontSize = "xx-large";
+
+  resetCharacterEventListeners();
+  clearInterval(timer);
+  createNewGame(results);
   console.log("You win!");
 }
 
 function loseGame() {
+  renderGameBoard(boardId);
   Array.from(container.children).forEach((child) => child.remove());
-  fetchPlayer().then(getGrid).then(makeGrid);
-  fetchPlayer().then(createCharacter);
-  fetchPlayer().then(createObstacle);
   clearScore();
   console.log("You Lose! Try again!");
 }
 
 function quitGame() {
-  resetBoard();
+  score = 0;
+  endTimer();
+  fetchPlayer(player.id).then((data) => (player = data));
+  setTimeout(renderStartMenu, 100);
+  // renderStartMenu()
+  resetCharacterEventListeners();
 }
 
-function resetButton() {
-  startStopButton.classList = "start-game";
-  startStopButton.innerText = "Start Game";
+function resetCharacterEventListeners() {
+  document.removeEventListener("keydown", handleKey);
+  document.removeEventListener("keydown", changeCharacterDirection);
 }
 
 function resetBoard() {
@@ -345,7 +522,7 @@ function resetBoard() {
 }
 
 function updateGame(results) {
-  fetch("http://localhost:3000/games/2", {
+  fetch(`https://maze-master.herokuapp.com/games/${currentGame.id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -354,24 +531,6 @@ function updateGame(results) {
   });
 }
 
-// createWelcome()
-
-// function createWelcome(){
-//   const playerNameForm = document.createElement('form')
-//   playerNameForm.classList = 'name-form'
-
-//
-
-//   const username = document.createElement('input')
-//   username.setAttribute('type', "text")
-//   username.setAttribute('name', 'username')
-//   username.setAttribute('placeholder', 'Username')
-
-//   const submitBtn = document.createElement('input')
-//   submitBtn.setAttribute('type', 'submit')
-//   submitBtn.setAttribute('value', 'Go!')
-
-//   playerNameForm.append(username, submitBtn)
-//   body.append(playerNameForm)
-
-// }
+function clearContent() {
+  Array.from(content.children).forEach((child) => child.remove());
+}
